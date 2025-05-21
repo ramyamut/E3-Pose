@@ -47,14 +47,37 @@ You're now ready to use E3-Pose!
 <br />
 
 ---
-### Train and test your own networks
+### Usage
 
 This repository contains all the code necessary to train and test your own networks. We provide separate scripts for training the segmentation U-Net and E3-CNNs, and a single script to deploy both for full rigid pose estimation.
 
-To better explain the training and testing procedures, we have writen corresponding tutorials, which were conceived to
-be read in order.
+#### Training a Segmentation U-Net for Translation Estimation
 
-- [train_unet.py](scripts/train_unet.py) explains how to train the segmentation U-Net for translation estimation.
+1. Set up separate training/validation dataset directories for images and ground-truth segmentation labels, where file names between image and label directories are the same. Ensure that all image file extensions are .nii or .nii.gz.
+
+2. If you are training a multi-class segmentation network, ensure that the object for which you want to estimate pose has category label 1 in the ground-truth labels.
+
+3. Name the output directory to save all model weights and metrics during network training.
+
+4. To train the segmentation U-Net, run:
+
+    ```
+    python scripts/train_unet.py \
+        train_image_dir/ \
+        train_label_dir/ \
+        val_image_dir/ \
+        val_label_dir/ \
+        output_model_dir/
+    ```
+
+    For detailed descriptions of other arguments, run:
+    
+    ```
+    python scripts/train_unet.py -h
+    ```
+
+#### Training an E3-CNN for Rotation Estimation
+
 - [train_e3cnn.py](scripts/train_e3cnn.py) explains how to train the E3-CNN for rotation estimation.
 - [inference.py](scripts/inference.py) explains how to run inference on an input volume given trained model weights for both networks.
 
