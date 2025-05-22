@@ -4,7 +4,7 @@ import json
 from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 
-from . import utils
+from .. import utils
 
 class SegmentationLightningModule(pl.LightningModule):
     """

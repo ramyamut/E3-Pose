@@ -4,7 +4,7 @@ import torchio
 
 from . import utils
 
-class AugmentationModel:
+class SegUNetAugmentation:
     def __init__(self,
                  im_shape, # [H, W, D]
                  img_res,
@@ -48,7 +48,7 @@ class AugmentationModel:
         self.resolution_transform = self.random_isotropic_LR
         self.random_noise = RandomNoise(max_std=noise_std)
         self.random_gamma = RandomGamma(log_gamma=gamma)
-        self.random_haste = RandomSpinHistoryArtifact()
+        self.random_sh_artifact = RandomSpinHistoryArtifact(sigma_range=(0.08,0.12), alpha_range=(0.5,1.5), sample_t_uniform=False)
         self.normalize_intensities_final = Normalize()
         
         # compose transformations
@@ -71,7 +71,7 @@ class AugmentationModel:
         self.intensity_transforms = torchio.transforms.Compose([
             self.random_bias_field,
             self.normalize_intensities,
-            self.random_haste,
+            self.random_sh_artifact,
             torchio.transforms.OneOf({
                 self.resolution_transform: resolution_prob,
                 self.identity_transform: 1-resolution_prob,
@@ -99,6 +99,30 @@ class AugmentationModel:
             self.normalize_intensities_final
         ])
 
+class RotE3CNNAugmentation:
+    def __init__(self, norm_perc=0.005):
+        # define all transformations to be applied
+        normalize_percentiles = norm_perc if isinstance(norm_perc, tuple) else (norm_perc, 1.-norm_perc)
+        self.normalize_intensities = torchio.transforms.Lambda(lambda x: utils.normalize_perc(x, normalize_percentiles), types_to_apply=[torchio.INTENSITY])
+        self.random_sh_artifact = RandomSpinHistoryArtifact(sigma_range=(0.2,0.4), alpha_range=(0.5,1.5), sample_t_uniform=True)
+        self.normalize_intensities_final = Normalize()
+        
+        # compose transforms
+        self.training_transforms = torchio.transforms.Compose([
+            self.normalize_intensities_final,
+            self.random_sh_artifact,
+            self.normalize_intensities,
+        ])
+        self.eval_transforms = torchio.transforms.Compose([
+            self.normalize_intensities_final,
+        ])
+    
+    def get_transform(self):
+        return self.training_transforms
+    
+    def get_eval_transform(self):
+        return self.eval_transforms
+
 class RandomIsotropicLR(torchio.transforms.Transform):
     """
     Downsamples volumes to a random lower resolution, then resamples back to the original resolution
@@ -123,15 +147,17 @@ class RandomSpinHistoryArtifact(torchio.transforms.Transform):
     """
     Augments volumes with simulated spin-history artifacts from high-resolution anatomical 2D MRI slices
     """
-    def __init__(self, p=1, sigma=None):
+    def __init__(self, p=1, sigma_range=(0.08,0.12), alpha_range=(0.5,1.5), sample_t_uniform=False):
         super().__init__(p=p)
-        self.sigma = sigma
+        self.sigma_range = sigma_range
+        self.alpha_range = alpha_range
+        self.sample_t_uniform = sample_t_uniform
     
     def apply_transform(self, subject):
         mask = subject['label']
         vol = subject['image']
         try:
-            vol_artifact = utils.simulate_spin_history_artifact(vol.tensor, mask.tensor, sigma=self.sigma)
+            vol_artifact = utils.simulate_spin_history_artifact(vol.tensor, mask.tensor, self.sigma_range, self.alpha_range, sample_t_uniform=self.sample_t_uniform)
         except:
             vol_artifact = torch.clone(vol.tensor)
         subject['image'] = torchio.ScalarImage(tensor=vol_artifact, affine=subject['image'].affine)

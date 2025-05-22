@@ -85,7 +85,6 @@ def training(train_image_dir,
         'batch_size': batchsize,
         'lr': lr,
         'weight_decay': weight_decay,
-        'thresh': thresh,
         'class_weights': class_weights,
         'dice_weight': dice_weight,
     }

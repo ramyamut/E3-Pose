@@ -3,7 +3,7 @@ import torchio
 import numpy as np
 import nibabel as nib
 
-from . import utils, augmentation
+from .. import utils, augmentation
 
 class SegmentationDataset(torch.utils.data.Dataset):
     """takes in a directory for images and corresponding masks and creates a dataset for training a segmentation network
@@ -32,8 +32,8 @@ class SegmentationDataset(torch.utils.data.Dataset):
                 torchio.transforms.RescaleIntensity()
             ])
         else:
-            self.augmentor = augmentation.AugmentationModel(im_shape=img_shape, img_res=img_res, **augm_params)
-            self.transform = self.augmentor.get_transform()
+            self.augmenter = augmentation.SegUNetAugmentation(im_shape=img_shape, img_res=img_res, **augm_params)
+            self.transform = self.augmenter.get_transform()
         
         # define subject dataset
         self.subjects_list = [

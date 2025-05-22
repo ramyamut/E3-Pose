@@ -62,12 +62,7 @@ This repository contains all the code necessary to train and test your own netwo
 4. To train the segmentation U-Net, run:
 
     ```
-    python scripts/train_unet.py \
-        train_image_dir/ \
-        train_label_dir/ \
-        val_image_dir/ \
-        val_label_dir/ \
-        output_model_dir/
+    python scripts/train_unet.py train_image_dir/ train_label_dir/ val_image_dir/ val_label_dir/ output_dir/
     ```
 
     For detailed descriptions of other arguments, run:
@@ -78,7 +73,32 @@ This repository contains all the code necessary to train and test your own netwo
 
 #### Training an E3-CNN for Rotation Estimation
 
-- [train_e3cnn.py](scripts/train_e3cnn.py) explains how to train the E3-CNN for rotation estimation.
+1. Set up separate training/validation dataset directories for images and ground-truth segmentation labels, where file names between image and label directories are the same. Ensure that all image file extensions are .nii or .nii.gz. If your segmentation labels have multiple classes, ensure that the object for which you want to estimate pose has category label 1.
+
+2. Set up separate CSV files for rotation annotations in training and validation datasets, in the following format:
+
+    | frame_id | rot_x | rot_y | rot_z |
+    |----------|-------|-------|-------|
+    | ...      | ...   | ...   | ...   |
+
+    where **frame_id** is the file name of the volume without the file extension, and **rot_x**, **rot_y**, **rot_z** are the Euler angles in degrees of the rotation from the volume to the canonical coordinate frame. The Euler angle rotation assumes the "xyz" ordering convention.
+
+3. Name the output directory to save all model weights and metrics during network training.
+
+4. To train the E3-CNN, run:
+
+    ```
+    python scripts/train_e3cnn.py train_image_dir/ train_label_dir/ path_to_train_annotations.csv \
+        val_image_dir/ val_label_dir/ path_to_val_annotations.csv \
+        output_dir/
+    ```
+
+    For detailed descriptions of other arguments, run:
+    
+    ```
+    python scripts/train_e3cnn.py -h
+    ```
+
 - [inference.py](scripts/inference.py) explains how to run inference on an input volume given trained model weights for both networks.
 
 <br />
@@ -120,7 +140,7 @@ Avants, Tustison, Song, Cook, Klein, Gee \
 NeuroImage, 2011
 
 <sup>5</sup> *Rapid head-pose detection for automated slice prescription of fetal-brain MRI* \
-Hoffmann, Abaci Turk, gagoski, Morgan, Wighton, Tisdall, Reuter, Adalsteinsson, Grant, Wald, van der Kouwe \
+Hoffmann, Abaci Turk, Gagoski, Morgan, Wighton, Tisdall, Reuter, Adalsteinsson, Grant, Wald, van der Kouwe \
 International Journal of Imaging Systems and Technology, 2021
 
 <sup>6</sup> *SE(3)-Equivariant and Noise-Invariant 3D Rigid Motion racking in Brain MRI* \
