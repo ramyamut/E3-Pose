@@ -30,8 +30,8 @@ class loader_rot_canonical(torch.utils.data.IterableDataset):
         self.resize = augm_params["resize"]
 
         # initialise resize/rescale functions
-        self.preproc_func = lambda x: utils.preprocess(x, normalise=True)
-        self.preproc_func_labels = lambda x: utils.preprocess(x, normalise=False)
+        self.preproc_func = lambda x: utils.preprocess_rot(x, normalise=True)
+        self.preproc_func_labels = lambda x: utils.preprocess_rot(x, normalise=False)
 
         # numpy seed
         self.eval = eval
@@ -90,7 +90,7 @@ class loader_rot_canonical(torch.utils.data.IterableDataset):
         else:
             xfm_1 = self.spatial_augmenter.create_random_transform()
         xfm_1 = xfm_1.astype('float32') @ xfm_2
-        frame_mask_1[0], frame_mask_1[1] = utils.preprocess_final(frame_mask_1[0], frame_mask_1[1], scale=0.6, resize=self.resize)
+        frame_mask_1[0], frame_mask_1[1] = utils.preprocess_rot_final(frame_mask_1[0], frame_mask_1[1], scale=0.6, resize=self.resize)
         frame_mask_1, _ = self.spatial_augmenter.perform_transform(xfm_1, *frame_mask_1)
         xfm_1 = np.linalg.inv(xfm_2 @ np.linalg.inv(xfm_1.astype('float32')))
 

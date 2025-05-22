@@ -4,15 +4,15 @@ In this repository, we present E3-Pose, the first framework for 3D canonical rig
 
 We rapidly estimate pose from volumes in a two-step process that separately estimates translation and rotation:
 
-1. Translation Estimation:
+1. **Translation Estimation:**
     * A standard segmentation U-Net localizes the object in the volume.
     * The center-of-mass (CoM) of the predicted mask is the estimated origin of the canonical coordinate frame. 
-2. Rotation Estimation:
+2. **Rotation Estimation:**
     * We crop input volumes such that the predicted segmentation mask is scaled to 60% of the cropped dimensions.
     * The E3-CNN takes in the cropped volume as input, and outputs a 9D rotation representation consisting of 2 vectors and 1 pseudovector.
     * The final output rotation to the canonical coordinate frame is computed by choosing the pseudovector direction that ensures right-handedness, and orthonormalizing via support-vector decomposition (SVD).
 
-Our E3-CNN architecture builds on prior theoretical work on [3D steerable CNNs](https://proceedings.neurips.cc/paper_files/paper/2018/file/488e4104520c6aab692863cc1dba45af-Paper.pdf) and uses code borrowed from [e3nn-UNet](https://github.com/SCAN-NRAD/e3nn_Unet), which implements 3D convolutions with the [e3nn](https://e3nn.org/) Python library for building $E(3)$-equivariant networks.
+Our E3-CNN architecture builds on prior theoretical work on [3D steerable CNNs](https://proceedings.neurips.cc/paper_files/paper/2018/file/488e4104520c6aab692863cc1dba45af-Paper.pdf)<sup>1</sup> and uses code borrowed from [e3nn-UNet](https://github.com/SCAN-NRAD/e3nn_Unet)<sup>2</sup>, which implements 3D convolutions with the [e3nn](https://e3nn.org/)<sup>3</sup> Python library for building $E(3)$-equivariant networks.
 
 <br />
 
@@ -20,7 +20,7 @@ Our E3-CNN architecture builds on prior theoretical work on [3D steerable CNNs](
 
 <br />
 
-Overall, E3-Pose outperforms state-of-the-art methods for rigid pose estimation in fetal brain MRI, including strategies that rely on classical optimisation ([ANTs](https://github.com/ANTsX/ANTs)<sup>1</sup>), anatomical landmark detection ([Fetal-Align](https://github.com/mu40/fetal-align)), keypoint detection ([EquiTrack](https://github.com/BBillot/EquiTrack)), and direct pose regression with standard CNNs ([6DRep](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/12464/124640T/Automatic-brain-pose-estimation-in-fetal-MRI/10.1117/12.2647613.full), [RbR](https://github.com/HuXiaoling/Regre4Regis)). See figure below for rigid pose estimation in low-SNR volumes with severe artifacts. Particularly, we show in our paper that regularizing network parameters to conform with the physical symmetry of rigid pose estimation mitigates overfitting and permits better generalization to out-of-distribution data.
+Overall, E3-Pose outperforms state-of-the-art methods for rigid pose estimation in fetal brain MRI, including strategies that rely on classical optimisation ([ANTs](https://github.com/ANTsX/ANTs)<sup>4</sup>), anatomical landmark detection ([Fetal-Align](https://github.com/mu40/fetal-align)<sup>5</sup>), keypoint detection ([EquiTrack](https://github.com/BBillot/EquiTrack)<sup>6</sup>), and direct pose regression with standard CNNs ([6DRep](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/12464/124640T/Automatic-brain-pose-estimation-in-fetal-MRI/10.1117/12.2647613.full)<sup>7</sup>, [RbR](https://github.com/HuXiaoling/Regre4Regis)<sup>8</sup>). See figure below for rigid pose estimation in low-SNR volumes with severe artifacts. Particularly, we show in our paper that regularizing network parameters to conform with the physical symmetry of rigid pose estimation mitigates overfitting and permits better generalization to out-of-distribution data.
 
 <br />
 
@@ -99,14 +99,30 @@ This repository contains all the code necessary to train and test your own netwo
     python scripts/train_e3cnn.py -h
     ```
 
-- [inference.py](scripts/inference.py) explains how to run inference on an input volume given trained model weights for both networks.
+#### Running Rigid Pose Estimation with Trained Model Weights
+
+1. Set up an input directory of images (all file extensions must be .nii or .nii.gz) on which to run rigid pose estimation.
+
+2. Name the output directory to save all estimated poses.
+
+3. To estimate pose on all inputs, run:
+
+    ```
+    python scripts.inference.py input_image_dir/ output_dir/ path_to_segmentation_unet.ckpt path_to_e3cnn.pth
+    ```
+
+    For detailed descriptions of other arguments, run:
+    
+    ```
+    python scripts/inference.py -h
+    ```
+
+4. Output poses are saved as 4x4 transform matrices in .npy format in the output directory, where file names are the same as the inputs.
 
 <br />
 
 ---
 ### Citation/Contact
-
-This code is under [Apache 2.0](LICENSE.txt) licensing.
 
 If you find this work useful for your research, please cite:
 
@@ -152,5 +168,5 @@ Faghihpirayesh, Karimi, Erdogmus, Gholipour \
 Proceedings of SPIE: Medical Imaging: Image Processing, 2023
 
 <sup>8</sup> *Registration by Regression (RbR): a framework for interpretable and flexible atlas registration* \
-Gopinathm Hum Hoffmnn, Puonti, Iglesias \
+Gopinath, Hu, Hoffmann, Puonti, Iglesias \
 International Workshop on Biomedical Image Registration, 2024

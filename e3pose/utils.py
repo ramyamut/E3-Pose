@@ -102,8 +102,18 @@ def build_xfm_dict(xfm_dir):
 
 # ----------------------------------------------- preprocessing functions -----------------------------------------------
 
-def preprocess(files, normalise=True, return_aff=False):
-    """resize is a tuple of the desired shape. In 3D, it can either be [H, W, D] or [H, W, D, C]"""
+def preprocess_seg(image, aff):
+    transform = torchio.transforms.Compose([
+                                        torchio.transforms.RescaleIntensity(),
+                                        torchio.transforms.Resample(3.),
+                                        torchio.transforms.CropOrPad(64),
+                                        torchio.transforms.RescaleIntensity(),
+                                    ])
+    image = torchio.ScalarImage(tensor=torch.tensor(image).unsqueeze(0), affine=aff)
+    image_transformed = transform(image)
+    return image_transformed.tensor, image_transformed.affine
+
+def preprocess_rot(files, normalise=True, return_aff=False):
 
     # read volume
     aff = None
@@ -129,7 +139,7 @@ def preprocess(files, normalise=True, return_aff=False):
     else:
         return vol
 
-def preprocess_final(vol, lab, scale=0.6, resize=[64,64,64]):
+def preprocess_rot_final(vol, lab, scale=0.6, resize=[64,64,64]):
     
     vol = vol.squeeze()
     lab = lab.squeeze()
@@ -146,7 +156,7 @@ def preprocess_final(vol, lab, scale=0.6, resize=[64,64,64]):
     shape = np.array(vol_rolled.shape).astype(np.float32)
     shape *= np.array(resize) / np.max(shape)
     shape = np.round(np.array(shape)).astype(np.int32)
-    resize = torchio.Resize(tuple(shape))
+    resize = torchio.transforms.Compose([torchio.Resize(tuple(shape)), torchio.transforms.RescaleIntensity()])
     vol_rolled = resize(torchio.ScalarImage(tensor=torch.tensor(vol_rolled).unsqueeze(0))).tensor.squeeze().unsqueeze(-1).numpy()
     lab_rolled = resize(torchio.LabelMap(tensor=torch.tensor(lab_rolled).unsqueeze(0))).tensor.squeeze().unsqueeze(-1).numpy()
     
@@ -696,7 +706,7 @@ def postprocess_segmentation(raw_pred, thresh=0.15):
     out = torch.tensor(processed_mask).unsqueeze(0)
     return out.detach().cpu()
 
-def postprocess_rotation(xax, yax, zax):
+def axes_to_rotation(xax, yax, zax):
     xfm1 = torch.stack([torch.eye(3)]*xax.shape[0], dim=0)
     xfm1[:,:3,0] = xax
     xfm1[:,:3,1] = yax
@@ -716,3 +726,15 @@ def postprocess_rotation(xax, yax, zax):
             xfm.append(xfm2[d])
     xfm = torch.stack(xfm, dim=0).to(xax.device)
     return xfm
+
+def postprocess_rotation(raw_pred):
+    pred = raw_pred[:,:,0,0,0].reshape(1, -1, 3).detach()
+    pred = torch.nn.functional.normalize(pred,dim=2)
+    xfm = torch.linalg.inv(axes_to_rotation(pred[:,0], pred[:,1], pred[:,2]))
+    return xfm.squeeze().detach().cpu().numpy()
+
+def get_rot_from_aff(aff):
+    rot = np.copy(aff[:3,:3])
+    for j in range(3):
+        rot[:,j] /= np.linalg.norm(rot[:,j])
+    return rot

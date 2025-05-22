@@ -131,7 +131,7 @@ def training(training_im_dir,
                 with torch.no_grad():
                 # compute rotation error
                     pred = torch.nn.functional.normalize(net.pool(output)[:,:,0,0,0].reshape(image.shape[0], -1, 3))
-                    rot_pred = utils.postprocess_rotation(pred[:,0], pred[:,1], pred[:,2])
+                    rot_pred = utils.axes_to_rotation(pred[:,0], pred[:,1], pred[:,2])
                     err_R = utils.rotation_matrix_to_angle_loss(rot, rot_pred).item()
                 
                 epoch_train_err_R += err_R
@@ -187,7 +187,7 @@ def training(training_im_dir,
                 
                 # compute rotation error
                 pred = torch.nn.functional.normalize(net.pool(output)[:,:,0,0,0].reshape(image.shape[0], -1, 3))
-                rot_pred = utils.postprocess_rotation(pred[:,0], pred[:,1], pred[:,2])
+                rot_pred = utils.axes_to_rotation(pred[:,0], pred[:,1], pred[:,2])
                 err_R = utils.rotation_matrix_to_angle_loss(rot, rot_pred).item()
                 epoch_val_err_R += err_R
 
