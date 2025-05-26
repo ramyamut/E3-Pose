@@ -20,7 +20,12 @@ Our E3-CNN architecture builds on prior theoretical work on [3D steerable CNNs](
 
 <br />
 
-Overall, E3-Pose outperforms state-of-the-art methods for rigid pose estimation in fetal brain MRI, including strategies that rely on classical optimisation ([ANTs](https://github.com/ANTsX/ANTs)<sup>4</sup>), anatomical landmark detection ([Fetal-Align](https://github.com/mu40/fetal-align)<sup>5</sup>), keypoint detection ([EquiTrack](https://github.com/BBillot/EquiTrack)<sup>6</sup>), and direct pose regression with standard CNNs ([6DRep](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/12464/124640T/Automatic-brain-pose-estimation-in-fetal-MRI/10.1117/12.2647613.full)<sup>7</sup>, [RbR](https://github.com/HuXiaoling/Regre4Regis)<sup>8</sup>). See figure below for rigid pose estimation in low-SNR volumes with severe artifacts. Particularly, we show in our paper that regularizing network parameters to conform with the physical symmetry of rigid pose estimation mitigates overfitting and permits better generalization to out-of-distribution data.
+Overall, E3-Pose outperforms state-of-the-art methods for rigid pose estimation in fetal brain MRI, 
+including strategies that rely on classical optimization ([ANTs](https://github.com/ANTsX/ANTs)<sup>4</sup>), 
+anatomical landmark detection ([Fetal-Align](https://github.com/mu40/fetal-align)<sup>5</sup>), 
+keypoint detection ([EquiTrack](https://github.com/BBillot/EquiTrack)<sup>6</sup>), 
+and direct pose regression with standard CNNs ([3DPose-Net](https://github.com/SadeghMSalehi/DeepRegistration)<sup>7</sup>, [6DRep](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/12464/124640T/Automatic-brain-pose-estimation-in-fetal-MRI/10.1117/12.2647613.full)<sup>8</sup>, [RbR](https://github.com/HuXiaoling/Regre4Regis)<sup>9</sup>). 
+See figure below for rigid pose estimation in low-SNR volumes with severe artifacts. Particularly, we show in our paper that regularizing network parameters to conform with the physical symmetry of rigid pose estimation mitigates overfitting and permits better generalization to out-of-distribution data.
 
 <br />
 
@@ -163,10 +168,14 @@ International Journal of Imaging Systems and Technology, 2021
 Billot, Dey, Moyer, Hoffmann, Abaci Turk, Gagoski \
 IEEE Transactions on Medical Imaging, 2024
 
-<sup>7</sup> *Automatic brain pose estimation in fetal MRI* \
+<sup>7</sup> *Real-time Deep Pose Estimation with Geodesic Loss for Image-to-Template Rigid Registration* \
+Salehi, Khan, Erdogmus, Gholipour \
+IEEE Transactions on Medical Imaging, 2019
+
+<sup>8</sup> *Automatic brain pose estimation in fetal MRI* \
 Faghihpirayesh, Karimi, Erdogmus, Gholipour \
 Proceedings of SPIE: Medical Imaging: Image Processing, 2023
 
-<sup>8</sup> *Registration by Regression (RbR): a framework for interpretable and flexible atlas registration* \
+<sup>9</sup> *Registration by Regression (RbR): a framework for interpretable and flexible atlas registration* \
 Gopinath, Hu, Hoffmann, Puonti, Iglesias \
 International Workshop on Biomedical Image Registration, 2024
