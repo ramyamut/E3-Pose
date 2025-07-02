@@ -712,6 +712,7 @@ def axes_to_rotation(xax, yax, zax):
     xfm1[:,:3,1] = yax
     xfm1[:,:3,2] = zax
     xfm2 = torch.clone(xfm1)
+    xfm2[:,:3,0] = -xax
     U1, _, Vh1 = torch.linalg.svd(xfm1)
     U2, _, Vh2 = torch.linalg.svd(xfm2)
         
@@ -730,7 +731,7 @@ def axes_to_rotation(xax, yax, zax):
 def postprocess_rotation(raw_pred):
     pred = raw_pred[:,:,0,0,0].reshape(1, -1, 3).detach()
     pred = torch.nn.functional.normalize(pred,dim=2)
-    xfm = torch.linalg.inv(axes_to_rotation(pred[:,0], pred[:,1], pred[:,2]))
+    xfm = axes_to_rotation(pred[:,0], pred[:,1], pred[:,2])
     return xfm.squeeze().detach().cpu().numpy()
 
 def get_rot_from_aff(aff):
