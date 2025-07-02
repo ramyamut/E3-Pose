@@ -121,7 +121,7 @@ def training(training_im_dir,
                 output = net.forward(image, pool=False)
                 pred_norm = output.reshape(image.shape[0], -1, 3, output.shape[2]*output.shape[3]*output.shape[4])
                 pred_norm = torch.nn.functional.normalize(pred_norm,dim=2) #[B, 3, 3, vox]
-                target = torch.linalg.inv(rot)[:,:3,:3].permute(0,2,1).unsqueeze(-1) #[B, 3, 3, 1]
+                target = rot[:,:3,:3].permute(0,2,1).unsqueeze(-1) #[B, 3, 3, 1]
 
                 # compute loss
                 pseudovector_loss = torch.cross(pred_norm[:,0], target[:,0], dim=1).norm(dim=1).mean()
@@ -130,7 +130,7 @@ def training(training_im_dir,
                 
                 with torch.no_grad():
                 # compute rotation error
-                    pred = torch.nn.functional.normalize(net.pool(output)[:,:,0,0,0].reshape(image.shape[0], -1, 3))
+                    pred = torch.nn.functional.normalize(net.pool(output)[:,:,0,0,0].reshape(image.shape[0], -1, 3),dim=2)
                     rot_pred = utils.axes_to_rotation(pred[:,0], pred[:,1], pred[:,2])
                     err_R = utils.rotation_matrix_to_angle_loss(rot, rot_pred).item()
                 
@@ -176,7 +176,7 @@ def training(training_im_dir,
                 output = net.forward(image, pool=False)
                 pred_norm = output.reshape(image.shape[0], -1, 3, output.shape[2]*output.shape[3]*output.shape[4])
                 pred_norm = torch.nn.functional.normalize(pred_norm,dim=2) #[B, 3, 3, vox]
-                target = torch.linalg.inv(rot)[:,:3,:3].permute(0,2,1).unsqueeze(-1) #[B, 3, 3, 1]
+                target = rot[:,:3,:3].permute(0,2,1).unsqueeze(-1) #[B, 3, 3, 1]
 
                 # compute loss
                 pseudovector_loss = torch.cross(pred_norm[:,0], target[:,0], dim=1).norm(dim=1).mean()
@@ -186,7 +186,7 @@ def training(training_im_dir,
                 epoch_val_loss += val_loss.item()
                 
                 # compute rotation error
-                pred = torch.nn.functional.normalize(net.pool(output)[:,:,0,0,0].reshape(image.shape[0], -1, 3))
+                pred = torch.nn.functional.normalize(net.pool(output)[:,:,0,0,0].reshape(image.shape[0], -1, 3),dim=2)
                 rot_pred = utils.axes_to_rotation(pred[:,0], pred[:,1], pred[:,2])
                 err_R = utils.rotation_matrix_to_angle_loss(rot, rot_pred).item()
                 epoch_val_err_R += err_R
