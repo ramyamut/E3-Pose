@@ -102,11 +102,11 @@ def build_xfm_dict(xfm_dir):
 
 # ----------------------------------------------- preprocessing functions -----------------------------------------------
 
-def preprocess_seg(image, aff):
+def preprocess_seg(image, aff, crop_size=128):
     transform = torchio.transforms.Compose([
                                         torchio.transforms.RescaleIntensity(),
                                         torchio.transforms.Resample(3.),
-                                        torchio.transforms.CropOrPad(64),
+                                        torchio.transforms.CropOrPad(crop_size),
                                         torchio.transforms.RescaleIntensity(),
                                     ])
     image = torchio.ScalarImage(tensor=torch.tensor(image).unsqueeze(0), affine=aff)
@@ -305,7 +305,8 @@ def simulate_spin_history_artifact(img, label, sigma_range, alpha_range, sample_
         return torch.clone(img)
     
     boundary_idx = torch.nonzero(label_boundary[0])
-    grid = torch.meshgrid(torch.linspace(-1, 1, img_shape[1]), torch.linspace(-1, 1, img_shape[2]), torch.linspace(-1, 1, img_shape[3]))
+    factor = [img_shape[1]/64, img_shape[2]/64, img_shape[3]/64]
+    grid = torch.meshgrid(torch.linspace(-factor[0], factor[0], img_shape[1]), torch.linspace(-factor[1], factor[1], img_shape[2]), torch.linspace(-factor[2], factor[2], img_shape[3]))
     grid = torch.stack(list(grid), dim=-1).to(img.device) # [H, W, D, 3]
     
     boundary_pts = grid[boundary_idx[:,0], boundary_idx[:,1], boundary_idx[:,2],:] # [points, 3 (xyz)]

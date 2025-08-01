@@ -19,6 +19,10 @@ parser.add_argument("--image_size", type=int, dest="image_size", default=64, hel
 # AUGMENTATION
 parser.add_argument("--rotation", type=int, dest="rotation_range", default=90, help="random rotation parameter for data augmentation")
 parser.add_argument("--shift", type=int, dest="shift_range", default=5, help="random translation parameter for data augmentation")
+parser.add_argument("--img_res", type=float, dest="img_res", default=3., help="input volume resolution during training")
+parser.add_argument("--max_bias", type=float, dest="max_bias", default=.5, help="max magnitude of coefficients for bias field simulation")
+parser.add_argument("--max_res_iso", type=float, dest="max_res_iso", default=7.5, help="max voxel dimension (in mm) for low-resolution augmentations")
+parser.add_argument("--gamma", type=float, dest="gamma", default=.8, help="max log value of paremeter for gamma augmentation")
 parser.add_argument("--norm_perc", type=float, dest="norm_perc", default=.005, help="fraction of input volume intensities that will be normalized to (0,1)")
 
 # ARCHITECTURE

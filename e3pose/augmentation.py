@@ -6,14 +6,12 @@ from . import utils
 
 class SegUNetAugmentation:
     def __init__(self,
-                 im_shape, # [H, W, D]
-                 img_res,
+                 crop_size=128, # [H, W, D]
+                 img_res=3.,
                  flipping=True,
-                 scaling_bounds=(0.8, 2.0),
+                 scaling_bounds=(0.5, 1.3),
                  rotation_bounds=15,
                  translation_bounds=False,
-                 nonlin_std=3.,
-                 nonlin_scale=.0625,
                  randomise_res=False,
                  max_res_iso=8.,
                  max_bias=.5,
@@ -21,6 +19,7 @@ class SegUNetAugmentation:
                  norm_perc=0.02,
                  gamma=0.4):
         # define all transformations to be applied
+        self.crop_size = crop_size
         self.identity_transform = torchio.transforms.Lambda(lambda x: utils.identity_transform(x))
         self.random_affine = torchio.transforms.RandomAffine(
             scales=(scaling_bounds[0], scaling_bounds[1], scaling_bounds[0], scaling_bounds[1], scaling_bounds[0], scaling_bounds[1]),
@@ -31,10 +30,6 @@ class SegUNetAugmentation:
             scales=(scaling_bounds[0], scaling_bounds[1], scaling_bounds[0], scaling_bounds[1], scaling_bounds[0], scaling_bounds[1]),
             degrees=0,
             translation=0
-        )
-        self.random_elastic = torchio.transforms.RandomElasticDeformation(
-            num_control_points=tuple([int(im_shape[i]*nonlin_scale) for i in range(len(im_shape))]),
-            max_displacement=nonlin_std,
         )
         self.random_flip = torchio.transforms.RandomFlip()
         self.max_bias = max_bias
@@ -54,7 +49,6 @@ class SegUNetAugmentation:
         # compose transformations
         self.spatial_deform_transforms = torchio.transforms.Compose([
             self.random_affine,
-            self.random_elastic
         ])
         flip_prob = 1. if flipping else 0.
         self.spatial_transforms = torchio.transforms.Compose([
@@ -84,10 +78,9 @@ class SegUNetAugmentation:
             self.random_gamma,
         ])
         self.all_transforms = torchio.transforms.Compose([
-            torchio.transforms.CropOrPad(64, mask_name='label'),
+            torchio.transforms.CropOrPad(self.crop_size),
             self.spatial_transforms,
             self.intensity_transforms,
-            CropPad()
         ])
     
     def get_transform(self):
@@ -95,23 +88,46 @@ class SegUNetAugmentation:
     
     def get_val_transform(self):
         return torchio.transforms.Compose([
-            torchio.transforms.CropOrPad(64, mask_name='label'),
+            torchio.transforms.CropOrPad(self.crop_size),
             self.normalize_intensities_final
         ])
 
 class RotE3CNNAugmentation:
-    def __init__(self, norm_perc=0.005):
+    def __init__(self,
+                 max_bias=.5,
+                 img_res=3.,
+                 max_res_iso=7.5,
+                 norm_perc=0.005,
+                 gamma=2.0,
+        ):
         # define all transformations to be applied
         normalize_percentiles = norm_perc if isinstance(norm_perc, tuple) else (norm_perc, 1.-norm_perc)
+        self.max_bias = max_bias
+        self.random_bias_field = RandomBiasField(coefficients=self.max_bias)
+        self.max_res_iso = max_res_iso
+        self.max_res_iso = np.array(utils.reformat_to_list(max_res_iso, length=3, dtype='float'))
+        self.img_res = img_res
+        self.iso_downsampling_scale = np.max(self.max_res_iso / img_res)
+        self.random_isotropic_LR = RandomIsotropicLR(lr_scale=self.iso_downsampling_scale)
+        self.identity_transform = torchio.transforms.Lambda(lambda x: utils.identity_transform(x))
+        self.resolution_transform = torchio.transforms.OneOf({
+                  RandomIsotropicLR(lr_scale=max_res_iso/self.img_res): 0.9,
+                  self.identity_transform: 0.1
+        }),
         self.normalize_intensities = torchio.transforms.Lambda(lambda x: utils.normalize_perc(x, normalize_percentiles), types_to_apply=[torchio.INTENSITY])
         self.random_sh_artifact = RandomSpinHistoryArtifact(sigma_range=(0.2,0.4), alpha_range=(0.5,1.5), sample_t_uniform=True)
         self.normalize_intensities_final = Normalize()
+        self.gamma = gamma
+        self.random_gamma = RandomGamma(log_gamma=self.gamma)
         
         # compose transforms
         self.training_transforms = torchio.transforms.Compose([
+            self.random_bias_field,
             self.normalize_intensities_final,
             self.random_sh_artifact,
+            self.resolution_transform,
             self.normalize_intensities,
+            self.random_gamma,
         ])
         self.eval_transforms = torchio.transforms.Compose([
             self.normalize_intensities_final,
@@ -162,22 +178,6 @@ class RandomSpinHistoryArtifact(torchio.transforms.Transform):
             vol_artifact = torch.clone(vol.tensor)
         subject['image'] = torchio.ScalarImage(tensor=vol_artifact, affine=subject['image'].affine)
         return subject
-
-class CropPad(torchio.transforms.Transform):
-    """
-    Randomly crops and zero-pads volume borders
-    """
-    def __init__(self, p=1):
-        super().__init__(p=p)
-    
-    def apply_transform(self, subject):
-        cutoff = np.random.randint(8,16)
-        params = [0]*3
-        params[np.random.randint(3)] = cutoff
-        params = tuple(params)
-        crop_transform = torchio.transforms.Compose([torchio.transforms.Crop(params), torchio.transforms.Pad(params)])
-        transformed = crop_transform(subject)
-        return transformed
 
 class Normalize(torchio.transforms.Transform):
     """

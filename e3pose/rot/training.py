@@ -25,6 +25,10 @@ def training(training_im_dir,
              image_size=64,
              rotation_range=90,
              shift_range=5,
+             max_bias=0.5,
+             img_res=3.,
+             max_res_iso=7.5,
+             gamma=2.0,
              norm_perc=0.005,
              n_levels=4,
              kernel_size=5,
@@ -47,6 +51,10 @@ def training(training_im_dir,
     augment_params = {'resize': image_size,
                       'rotation_range': rotation_range,
                       'shift_range': shift_range,
+                      'max_bias': max_bias,
+                      'img_res': img_res,
+                      'max_res_iso': max_res_iso,
+                      'gamma': gamma,
                       'norm_perc': norm_perc}
 
     # training loader
@@ -82,7 +90,6 @@ def training(training_im_dir,
     # Check if need to resume training and load weights
     last_epoch = 0
     best_val_loss = 1e9
-    best_val_dice = 0
     list_scores = []
     if resume:
         previous_files = sorted([p for p in os.listdir(models_dir) if re.sub('\D', '', p) != ''])
@@ -96,7 +103,6 @@ def training(training_im_dir,
             if os.path.isfile(path_val_scores):
                 list_scores = np.load(path_val_scores)
                 best_val_loss = np.min(list_scores[:, 2])
-                best_val_dice = np.max(list_scores[:, 3])
                 list_scores = list_scores.tolist()
 
     # Training loop

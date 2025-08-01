@@ -11,6 +11,7 @@ parser.add_argument("unet_path", help="path to segmentation unet model weights")
 parser.add_argument("e3cnn_path", help="path to e3cnn model weights")
 
 # -------------------------------------------- UNet architecture parameters --------------------------------------------
+parser.add_argument("--unet_crop_size", type=int, dest="unet_crop_size", default=128, help="volume crop size in voxels for segmentation U-Net")
 parser.add_argument("--unet_n_levels", type=int, dest="unet_n_levels", default=4, help="number of levels in U-Net")
 parser.add_argument("--unet_feat", type=int, dest="unet_feat_count", default=16, help="number of output features in first layer of U-Net")
 parser.add_argument("--unet_feat_mult", type=int, dest="unet_feat_mult", default=2, help="multiplicative factor for number of features after each U-Net level")

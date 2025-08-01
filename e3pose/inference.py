@@ -19,6 +19,7 @@ def inference(input_image_dir,
              output_dir,
              unet_path,
              e3cnn_path,
+             unet_crop_size=128,
              unet_n_levels=4,
              unet_feat_count=16,
              unet_feat_mult=2,
@@ -48,7 +49,7 @@ def inference(input_image_dir,
         aff_rot = utils.get_rot_from_aff(aff)
         
         # TRANSLATION ESTIMATION
-        unet_input, unet_aff = utils.preprocess_seg(image, aff)
+        unet_input, unet_aff = utils.preprocess_seg(image, aff, crop_size=unet_crop_size)
         unet_input = unet_input.to(device).unsqueeze(0).to(torch.float32)
         unet_output = torch.softmax(unet(unet_input), dim=1)
         seg_pred = utils.postprocess_segmentation(raw_pred=torch.clone(unet_output), thresh=seg_thresh)

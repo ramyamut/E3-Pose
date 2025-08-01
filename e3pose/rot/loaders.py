@@ -205,7 +205,13 @@ class IntensityAugmenter(object):
                  seed=None):
 
         # initialise
-        self.aug_model = augmentation.RotE3CNNAugmentation(augm_params["norm_perc"])
+        self.aug_model = augmentation.RotE3CNNAugmentation(
+            max_bias=augm_params["max_bias"],
+            img_res=augm_params["img_res"],
+            max_res_iso=augm_params["max_res_iso"],
+            gamma=augm_params["gamma"],
+            norm_perc=augm_params["norm_perc"]
+        )
         self.trainT = self.aug_model.get_transform()
         self.evalT = self.aug_model.get_eval_transform()
 

@@ -19,20 +19,14 @@ class SegmentationDataset(torch.utils.data.Dataset):
         self.image_dir = image_dir
         self.label_dir = label_dir
         self.path_images, self.path_labels = utils.get_image_label_paths(self.image_dir, self.label_dir)
-        img = nib.load(self.path_images[0])
-        img_shape = list(np.squeeze(img.get_fdata()).shape)[:3]
-        img_res = np.array(img.header['pixdim'][1:4])
 
         self.eval_mode = eval_mode
+        self.augmenter = augmentation.SegUNetAugmentation(**augm_params)
         
         # define augmentation model
         if self.eval_mode:
-            self.transform =  torchio.transforms.Compose([
-                torchio.transforms.CropOrPad(64, mask_name='label'),
-                torchio.transforms.RescaleIntensity()
-            ])
+            self.transform = self.augmenter.get_val_transform()
         else:
-            self.augmenter = augmentation.SegUNetAugmentation(im_shape=img_shape, img_res=img_res, **augm_params)
             self.transform = self.augmenter.get_transform()
         
         # define subject dataset

@@ -20,15 +20,16 @@ parser.add_argument("--batchsize", type=int, dest="batchsize", default=4, help="
 
 # SPATIAL
 parser.add_argument("--flipping", action='store_true', dest="flipping", help="random volume flipping during training")
-parser.add_argument("--scaling", dest="scaling_bounds", type=float, default=0.2, help="random scaling parameter for data augmentation")
+parser.add_argument("--crop_size", dest="crop_size", type=int, default=128, help="volume crop size in voxels during training")
+parser.add_argument("--scaling_lower_bound", dest="scaling_lower_bound", type=float, default=0.5, help="random scaling lower bound parameter for data augmentation")
+parser.add_argument("--scaling_upper_bound", dest="scaling_upper_bound", type=float, default=1.3, help="random scaling upper bound parameter for data augmentation")
 parser.add_argument("--rotation", dest="rotation_bounds", type=float, default=180, help="random rotation parameter for data augmentation")
 parser.add_argument("--translation", dest="translation_bounds", type=float, default=10, help="random translation parameter for data augmentation")
-parser.add_argument("--nonlin_std", type=float, dest="nonlin_std", default=4., help="max displacement at each control point for random elastic deformations")
-parser.add_argument("--nonlin_scale", type=float, dest="nonlin_scale", default=.05, help="ratio of control points per voxel for random smooth elastic deformations")
 
 # OTHER AUGMENTATIONS
 parser.add_argument("--randomise_res", action='store_true', dest="randomise_res", help="augment training volumes with randomly simulated low resolutions")
-parser.add_argument("--max_res_iso", type=float, dest="max_res_iso", default=8., help="max downsampling scale for low-resolution augmentations")
+parser.add_argument("--img_res", type=float, dest="img_res", default=3., help="input volume resolution during training")
+parser.add_argument("--max_res_iso", type=float, dest="max_res_iso", default=8., help="max voxel dimension (in mm) for low-resolution augmentations")
 parser.add_argument("--max_bias", type=float, dest="max_bias", default=.5, help="max magnitude of coefficients for bias field simulation")
 parser.add_argument("--noise_std", type=float, dest="noise_std", default=.03, help="standard dev. for Gaussian noise data augmentation")
 parser.add_argument("--norm_perc", type=float, dest="norm_perc", default=.005, help="fraction of input volume intensities that will be normalized to (0,1)")
