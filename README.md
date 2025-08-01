@@ -21,21 +21,21 @@ Our E3-CNN architecture builds on prior theoretical work on [3D steerable CNNs](
 <br />
 
 Overall, E3-Pose outperforms state-of-the-art methods for rigid pose estimation in fetal brain MRI, 
-including strategies that rely on classical optimization ([ANTs](https://github.com/ANTsX/ANTs)<sup>4</sup>), 
-anatomical landmark detection ([Fetal-Align](https://github.com/mu40/fetal-align)<sup>5</sup>), 
+including strategies that rely on anatomical landmark detection ([Fetal-Align](https://github.com/mu40/fetal-align)<sup>4</sup>), 
+classical optimization ([FireANTs](https://github.com/rohitrango/FireANTs)<sup>5</sup>),
 keypoint detection ([EquiTrack](https://github.com/BBillot/EquiTrack)<sup>6</sup>), 
 and direct pose regression with standard CNNs ([3DPose-Net](https://github.com/SadeghMSalehi/DeepRegistration)<sup>7</sup>, [6DRep](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/12464/124640T/Automatic-brain-pose-estimation-in-fetal-MRI/10.1117/12.2647613.full)<sup>8</sup>, [RbR](https://github.com/HuXiaoling/Regre4Regis)<sup>9</sup>). 
 See figure below for rigid pose estimation in low-SNR volumes with severe artifacts. Particularly, we show in our paper that regularizing network parameters to conform with the physical symmetry of rigid pose estimation mitigates overfitting and permits better generalization to out-of-distribution data.
 
 <br />
 
-![vNav examples](images/vnav_examples.png)
+![examples](images/examples.png)
 
 <br />
 
 The full article describing this method is available at:
 
-**E3-Pose: Equivariant Rigid Pose Estimation With Application to Slice Prescription in Fetal Brain MRI** \
+**E3-Pose: Symmetry-Aware Rigid Pose Estimation in Fetal Brain MRI** \
 Muthukrishnan, Billot, Gagoski, Soldatelli, Grant, Golland
 
 
@@ -131,7 +131,7 @@ This repository contains all the code necessary to train and test your own netwo
 
 If you find this work useful for your research, please cite:
 
-**E3-Pose: Equivariant Rigid Pose Estimation With Application to Slice Prescription in Fetal Brain MRI** \
+**E3-Pose: Symmetry-Aware Rigid Pose Estimation in Fetal Brain MRI** \
 Muthukrishnan, Billot, Gagoski, Soldatelli, Grant, Golland
 
 If you have any question regarding the usage of this code, or any suggestions to improve it, please raise an issue
@@ -156,13 +156,13 @@ Journal of Machine Learning in Biomedical Imaging, 2024
 Geiger and Smidt \
 arXiV, 2022
 
-<sup>4</sup> *A reproducible evaluation of ANTs similarity metric performance in brain image registration* \
-Avants, Tustison, Song, Cook, Klein, Gee \
-NeuroImage, 2011
-
-<sup>5</sup> *Rapid head-pose detection for automated slice prescription of fetal-brain MRI* \
+<sup>4</sup> *Rapid head-pose detection for automated slice prescription of fetal-brain MRI* \
 Hoffmann, Abaci Turk, Gagoski, Morgan, Wighton, Tisdall, Reuter, Adalsteinsson, Grant, Wald, van der Kouwe \
 International Journal of Imaging Systems and Technology, 2021
+
+<sup>5</sup> *FireANTs: Adaptive Riemannian optimization for multi-scale diffeomorphic registration* \
+Jena, Chaudhari, Gee \
+arXiV, 2024
 
 <sup>6</sup> *SE(3)-Equivariant and Noise-Invariant 3D Rigid Motion racking in Brain MRI* \
 Billot, Dey, Moyer, Hoffmann, Abaci Turk, Gagoski \
