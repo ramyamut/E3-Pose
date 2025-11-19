@@ -1,18 +1,24 @@
-# E3-Pose
+# E(3)-Pose
 
-In this repository, we present E3-Pose, the first framework for 3D canonical rigid pose estimation from volumetric medical images that uses an $E(3)$-equivariant convolutional neural network (E3-CNN). Although we evaluate the utility of E3-Pose on fetal brain MRI for the application of automated slice prescription, the proposed methods are applicable more broadly.
+In this repository, we present E(3)-Pose, the first symmetry-aware framework for 6-DoF object pose estimation from volumetric images that uses an E(3)-equivariant convolutional neural network (E(3)-CNN). Although we evaluate the utility of E(3)-Pose on fetal brain MRI, the proposed methods hold potential for broader applications.
+
+<br />
+
+![Teaser](images/teaser.png)
+
+<br />
 
 We rapidly estimate pose from volumes in a two-step process that separately estimates translation and rotation:
 
 1. **Translation Estimation:**
     * A standard segmentation U-Net localizes the object in the volume.
-    * The center-of-mass (CoM) of the predicted mask is the estimated origin of the canonical coordinate frame. 
+    * The center-of-mass (CoM) of the predicted mask is the estimated origin of the canonical object coordinate frame. 
 2. **Rotation Estimation:**
     * We crop input volumes such that the predicted segmentation mask is scaled to 60% of the cropped dimensions.
-    * The E3-CNN takes in the cropped volume as input, and outputs a 9D rotation representation consisting of 2 vectors and 1 pseudovector.
-    * The final output rotation to the canonical coordinate frame is computed by choosing the pseudovector direction that ensures right-handedness, and orthonormalizing via support-vector decomposition (SVD).
+    * The E(3)-CNN takes in the cropped volume as input, and outputs an E(3)-equivariant rotation parametrization consisting of 2 vectors and 1 pseudovector.
+    * The output rotation is computed by choosing the pseudovector direction that ensures right-handedness, and orthonormalizing via support-vector decomposition (SVD).
 
-Our E3-CNN architecture builds on prior theoretical work on [3D steerable CNNs](https://proceedings.neurips.cc/paper_files/paper/2018/file/488e4104520c6aab692863cc1dba45af-Paper.pdf)<sup>1</sup> and uses code borrowed from [e3nn-UNet](https://github.com/SCAN-NRAD/e3nn_Unet)<sup>2</sup>, which implements 3D convolutions with the [e3nn](https://e3nn.org/)<sup>3</sup> Python library for building $E(3)$-equivariant networks.
+Our E(3)-CNN architecture builds on prior theoretical work on [3D steerable CNNs](https://proceedings.neurips.cc/paper_files/paper/2018/file/488e4104520c6aab692863cc1dba45af-Paper.pdf)<sup>1</sup> and uses code borrowed from [e3nn-UNet](https://github.com/SCAN-NRAD/e3nn_Unet)<sup>2</sup>, which implements 3D convolutions with the [e3nn](https://e3nn.org/)<sup>3</sup> Python library for building E(3)-equivariant networks.
 
 <br />
 
@@ -20,12 +26,10 @@ Our E3-CNN architecture builds on prior theoretical work on [3D steerable CNNs](
 
 <br />
 
-Overall, E3-Pose outperforms state-of-the-art methods for rigid pose estimation in fetal brain MRI, 
+Overall, E(3)-Pose outperforms state-of-the-art methods for pose estimation in fetal brain MRI volumes representative of clinical applications, 
 including strategies that rely on anatomical landmark detection ([Fetal-Align](https://github.com/mu40/fetal-align)<sup>4</sup>), 
-classical optimization ([FireANTs](https://github.com/rohitrango/FireANTs)<sup>5</sup>),
-keypoint detection ([EquiTrack](https://github.com/BBillot/EquiTrack)<sup>6</sup>), 
-and direct pose regression with standard CNNs ([3DPose-Net](https://github.com/SadeghMSalehi/DeepRegistration)<sup>7</sup>, [6DRep](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/12464/124640T/Automatic-brain-pose-estimation-in-fetal-MRI/10.1117/12.2647613.full)<sup>8</sup>, [RbR](https://github.com/HuXiaoling/Regre4Regis)<sup>9</sup>). 
-See figure below for rigid pose estimation in low-SNR volumes with severe artifacts. Particularly, we show in our paper that regularizing network parameters to conform with the physical symmetry of rigid pose estimation mitigates overfitting and permits better generalization to out-of-distribution data.
+template registration ([FireANTs](https://github.com/rohitrango/FireANTs)<sup>5</sup> and [EquiTrack](https://github.com/BBillot/EquiTrack)<sup>6</sup>), and direct pose regression with standard CNNs ([3DPose-Net](https://github.com/SadeghMSalehi/DeepRegistration)<sup>7</sup>, [6DRep](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/12464/124640T/Automatic-brain-pose-estimation-in-fetal-MRI/10.1117/12.2647613.full)<sup>8</sup>, [RbR](https://github.com/HuXiaoling/Regre4Regis)<sup>9</sup>). 
+See figure below for example results. Particularly, we show in our paper that regularizing network parameters to conform with physical symmetries mitigates overfitting to research-quality training datasets, and permits better generalization to out-of-distribution clinical data with pose ambiguities.
 
 <br />
 
@@ -35,9 +39,8 @@ See figure below for rigid pose estimation in low-SNR volumes with severe artifa
 
 The full article describing this method is available at:
 
-**E3-Pose: Symmetry-Aware Rigid Pose Estimation in Fetal Brain MRI** \
-Muthukrishnan, Billot, Gagoski, Soldatelli, Grant, Golland
-
+**Equivariant Symmetry-Aware Head Pose Estimation for Fetal MRI** \
+Muthukrishnan, Lee, Grant, Adalsteinsson, Gagoski, Billot, Golland
 
 ---
 ### Installation
@@ -46,15 +49,16 @@ Muthukrishnan, Billot, Gagoski, Soldatelli, Grant, Golland
 2. Install python 3.10.
 3. Install all the [required libraries](requirements.txt).
 4. If you want to use our trained model weights for fetal brain MRI, download the model weights [here](https://drive.google.com/drive/folders/1r6FVzXG9VLH-0MtMnD2hwjzdDqss1DSE?usp=sharing).
+5. If you want to train your own network on a [publicly available fetal MRI dataset](https://pubmed.ncbi.nlm.nih.gov/40800813/)<sup>10</sup>, download our manually annotated segmentations and poses [here](https://drive.google.com/file/d/1yO2o2sNNNEfcB_-ZDcVvHyCGxqk6SYyE/view?usp=sharing).
 
-You're now ready to use E3-Pose!
+You're now ready to use E(3)-Pose!
 
 <br />
 
 ---
 ### Usage
 
-This repository contains all the code necessary to train and test your own networks. We provide separate scripts for training the segmentation U-Net and E3-CNNs, and a single script to deploy both for full rigid pose estimation.
+This repository contains all the code necessary to train and test your own networks. We provide separate scripts for training the segmentation U-Net and E(3)-CNNs, and a single script to deploy both for full rigid pose estimation.
 
 #### Training a Segmentation U-Net for Translation Estimation
 
@@ -76,7 +80,7 @@ This repository contains all the code necessary to train and test your own netwo
     python scripts/train_unet.py -h
     ```
 
-#### Training an E3-CNN for Rotation Estimation
+#### Training an E(3)-CNN for Rotation Estimation
 
 1. Set up separate training/validation dataset directories for images and ground-truth segmentation labels, where file names between image and label directories are the same. Ensure that all image file extensions are .nii or .nii.gz. If your segmentation labels have multiple classes, ensure that the object for which you want to estimate pose has category label 1.
 
@@ -90,7 +94,7 @@ This repository contains all the code necessary to train and test your own netwo
 
 3. Name the output directory to save all model weights and metrics during network training.
 
-4. To train the E3-CNN, run:
+4. To train the E(3)-CNN, run:
 
     ```
     python scripts/train_e3cnn.py train_image_dir/ train_label_dir/ path_to_train_annotations.csv \
@@ -131,8 +135,8 @@ This repository contains all the code necessary to train and test your own netwo
 
 If you find this work useful for your research, please cite:
 
-**E3-Pose: Symmetry-Aware Rigid Pose Estimation in Fetal Brain MRI** \
-Muthukrishnan, Billot, Gagoski, Soldatelli, Grant, Golland
+**Equivariant Symmetry-Aware Head Pose Estimation for Fetal MRI** \
+Muthukrishnan, Lee, Grant, Adalsteinsson, Gagoski, Billot, Golland
 
 If you have any question regarding the usage of this code, or any suggestions to improve it, please raise an issue
 (preferred) or contact us at:\
@@ -143,7 +147,6 @@ If you have any question regarding the usage of this code, or any suggestions to
 
 ---
 ### References
-
 <sup>1</sup> *3D Steerable CNNs: Learning Rotationally Equivariant Features in Volumetric Data* \
 Weiler, Geiger, Welling, Boomsma, Cohen \
 Advances in Neural Information Processing Systems, 2018
@@ -179,3 +182,7 @@ Proceedings of SPIE: Medical Imaging: Image Processing, 2023
 <sup>9</sup> *Registration by Regression (RbR): a framework for interpretable and flexible atlas registration* \
 Gopinath, Hu, Hoffmann, Puonti, Iglesias \
 International Workshop on Biomedical Image Registration, 2024
+
+<sup>10</sup> *The developing human connectome project fetal functional MRI release: methods and data structures* \
+Karolis et al \
+Imaging Neuroscience, 2025
