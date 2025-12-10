@@ -1,6 +1,4 @@
 # python imports
-import os
-import numpy as np
 import pytorch_lightning as pl
 import glob
 
@@ -25,7 +23,12 @@ def training(train_image_dir,
              max_bias=.5,
              noise_std=0.03,
              norm_perc=0.005,
-             gamma=0.4,
+             gamma_min=-0.8,
+             gamma_max=0.,
+             sigma_min=1.5,
+             sigma_max=2.3,
+             alpha_min=0.5,
+             alpha_max=1.5,
              n_levels=4,
              unet_feat_count=16,
              feat_multiplier=2,
@@ -51,7 +54,9 @@ def training(train_image_dir,
         'max_bias': max_bias,
         'noise_std': noise_std,
         'norm_perc': norm_perc,
-        'gamma': gamma
+        'gamma': (gamma_min,gamma_max),
+        'sigma': (sigma_min, sigma_max),
+        'alpha': (alpha_min, alpha_max)
     }
     train_dataset = dataset.SegmentationDataset(
         image_dir=train_image_dir,
@@ -61,7 +66,7 @@ def training(train_image_dir,
     val_dataset = dataset.SegmentationDataset(
         image_dir=val_image_dir,
         label_dir=val_labels_dir,
-        augm_params=None,
+        augm_params=augm_params,
         eval_mode=True
     )
 

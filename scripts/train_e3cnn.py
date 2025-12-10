@@ -7,10 +7,9 @@ parser = ArgumentParser()
 # PATHS
 parser.add_argument("training_im_dir", type=str, help="data directory for training images")
 parser.add_argument("training_lab_dir", type=str, help="data directory for ground-truth training segmentation labels")
-parser.add_argument("training_anno_csv", type=str, help="path to ground-truth training canonical rotations")
 parser.add_argument("val_im_dir", type=str, help="data directory for validation images")
 parser.add_argument("val_lab_dir", type=str, help="data directory for ground-truth validation segmentation labels")
-parser.add_argument("val_anno_csv", type=str, help="path to ground-truth validation canonical rotations")
+parser.add_argument("anno_csv", type=str, help="path to ground-truth canonical rotations")
 parser.add_argument("results_dir", type=str, help="data directory for training outputs")
 
 # GENERAL
@@ -18,11 +17,16 @@ parser.add_argument("--image_size", type=int, dest="image_size", default=64, hel
 
 # AUGMENTATION
 parser.add_argument("--rotation", type=int, dest="rotation_range", default=90, help="random rotation parameter for data augmentation")
-parser.add_argument("--shift", type=int, dest="shift_range", default=5, help="random translation parameter for data augmentation")
+parser.add_argument("--shift", type=int, dest="shift_range", default=0, help="random translation parameter for data augmentation")
 parser.add_argument("--img_res", type=float, dest="img_res", default=3., help="input volume resolution during training")
 parser.add_argument("--max_bias", type=float, dest="max_bias", default=.5, help="max magnitude of coefficients for bias field simulation")
 parser.add_argument("--max_res_iso", type=float, dest="max_res_iso", default=7.5, help="max voxel dimension (in mm) for low-resolution augmentations")
-parser.add_argument("--gamma", type=float, dest="gamma", default=.8, help="max log value of paremeter for gamma augmentation")
+parser.add_argument("--gamma_min", type=float, dest="gamma_min", default=-2.0, help="min log value of parameter for gamma augmentation")
+parser.add_argument("--gamma_max", type=float, dest="gamma_max", default=0.1, help="max log value of parameter for gamma augmentation")
+parser.add_argument("--sigma_min", type=float, dest="sigma_min", default=2.3, help="min value of sigma parameter (in mm) for simulated spin history artifact augmentation")
+parser.add_argument("--sigma_max", type=float, dest="sigma_max", default=4.6, help="max value of sigma parameter (in mm) for simulated spin history artifact augmentation")
+parser.add_argument("--alpha_min", type=float, dest="alpha_min", default=0.5, help="min value of alpha parameter for simulated spin history artifact augmentation")
+parser.add_argument("--alpha_max", type=float, dest="alpha_max", default=1.5, help="max value of alpha parameter for simulated spin history artifact augmentation")
 parser.add_argument("--norm_perc", type=float, dest="norm_perc", default=.005, help="fraction of input volume intensities that will be normalized to (0,1)")
 
 # ARCHITECTURE

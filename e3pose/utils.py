@@ -289,7 +289,7 @@ def sample_t_val_uniform():
     t = uniform_dist.sample().item()
     return t
 
-def simulate_spin_history_artifact(img, label, sigma_range, alpha_range, sample_t_uniform=False):
+def simulate_spin_history_artifact(img, label, sigma_range, alpha_range, input_res=3., sample_t_uniform=False):
     """
     utility function to simulate spin-history artifact
     """
@@ -334,7 +334,9 @@ def simulate_spin_history_artifact(img, label, sigma_range, alpha_range, sample_
     plane_prod = plane_prod - d
     
     # simulate artifact
-    sigma = np.random.uniform(low=sigma_range[0], high=sigma_range[1])
+    sigma_mm = np.random.uniform(low=sigma_range[0], high=sigma_range[1])
+    units = (grid[1,0,0]-grid[0,0,0])[0].item()*5
+    sigma = sigma_mm*input_res/units
     alpha = np.random.uniform(low=alpha_range[0], high=alpha_range[1])
     artifact = alpha * 1/(sigma * np.sqrt(2 * np.pi)) * torch.exp(-0.5 * (plane_prod/sigma)**2)
     

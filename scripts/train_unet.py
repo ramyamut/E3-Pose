@@ -33,7 +33,12 @@ parser.add_argument("--max_res_iso", type=float, dest="max_res_iso", default=8.,
 parser.add_argument("--max_bias", type=float, dest="max_bias", default=.5, help="max magnitude of coefficients for bias field simulation")
 parser.add_argument("--noise_std", type=float, dest="noise_std", default=.03, help="standard dev. for Gaussian noise data augmentation")
 parser.add_argument("--norm_perc", type=float, dest="norm_perc", default=.005, help="fraction of input volume intensities that will be normalized to (0,1)")
-parser.add_argument("--gamma", type=float, dest="gamma", default=.8, help="max log value of paremeter for gamma augmentation")
+parser.add_argument("--gamma_min", type=float, dest="gamma_min", default=-.8, help="min log value of parameter for gamma augmentation")
+parser.add_argument("--gamma_max", type=float, dest="gamma_max", default=0., help="max log value of parameter for gamma augmentation")
+parser.add_argument("--sigma_min", type=float, dest="sigma_min", default=1.5, help="min value of sigma parameter (in mm) for simulated spin history artifact augmentation")
+parser.add_argument("--sigma_max", type=float, dest="sigma_max", default=2.3, help="max value of sigma parameter (in mm) for simulated spin history artifact augmentation")
+parser.add_argument("--alpha_min", type=float, dest="alpha_min", default=0.5, help="min value of alpha parameter for simulated spin history artifact augmentation")
+parser.add_argument("--alpha_max", type=float, dest="alpha_max", default=1.5, help="max value of alpha parameter for simulated spin history artifact augmentation")
 
 # -------------------------------------------- UNet architecture parameters --------------------------------------------
 parser.add_argument("--n_levels", type=int, dest="n_levels", default=4, help="number of levels in U-Net")
