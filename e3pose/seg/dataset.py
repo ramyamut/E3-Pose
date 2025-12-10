@@ -1,7 +1,5 @@
 import torch
 import torchio
-import numpy as np
-import nibabel as nib
 
 from .. import utils, augmentation
 

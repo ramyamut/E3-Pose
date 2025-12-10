@@ -5,36 +5,24 @@ async-timeout==4.0.3
 attrs==23.2.0
 babel==2.16.0
 batchgenerators==0.25
-Bottleneck @ file:///croot/bottleneck_1731058641041/work
-Brotli @ file:///tmp/abs_ecyw11_7ze/croots/recipe/brotli-split_1659616059936/work
-certifi @ file:///croot/certifi_1738623731865/work/certifi
-cffi @ file:///croot/cffi_1670423208954/work
-charset-normalizer @ file:///tmp/build/80754af9/charset-normalizer_1630003229654/work
 click==8.1.7
-colorama @ file:///home/conda/feedstock_root/build_artifacts/colorama_1666700638685/work
 contourpy==1.1.1
-cryptography @ file:///croot/cryptography_1694444244250/work
 cycler==0.12.1
-dataclasses @ file:///home/conda/feedstock_root/build_artifacts/dataclasses_1628958434797/work
 Deprecated==1.2.14
 dicom2nifti==2.4.9
 docopt==0.6.2
 docutils==0.19
-e3nn==0.5.4
+e3nn==0.5.5
 et_xmlfile==2.0.0
 exceptiongroup==1.2.2
 filelock==3.13.1
 fonttools==4.43.1
 frozenlist==1.4.1
 fsspec==2024.2.0
-future @ file:///croot/future_1677599870788/work
-fvcore @ file:///home/conda/feedstock_root/build_artifacts/fvcore_1671623667463/work
 humanize==4.9.0
-idna @ file:///croot/idna_1666125576474/work
 imageio==2.32.0
 imagesize==1.4.1
 iniconfig==2.1.0
-iopath @ file:///home/conda/feedstock_root/build_artifacts/iopath_1636568816351/work
 Jinja2==3.1.2
 joblib==1.3.2
 kiwisolver==1.4.5
@@ -54,7 +42,6 @@ networkx==3.2.1
 nibabel==5.1.0
 nnunet==1.7.1
 nose==1.3.7
-numexpr @ file:///croot/numexpr_1683221822650/work
 numpy==1.26.0
 nvidia-cublas-cu11==11.10.3.66
 nvidia-cublas-cu12==12.1.3.1
@@ -81,24 +68,18 @@ pandas==2.1.4
 patsy==1.0.1
 Pillow==10.0.1
 pluggy==1.5.0
-portalocker @ file:///home/conda/feedstock_root/build_artifacts/portalocker_1695662047585/work
-pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
 pydicom==2.4.3
 Pygments==2.17.2
 pykwalify==1.8.0
-pyOpenSSL @ file:///croot/pyopenssl_1690223430423/work
 pyparsing==3.1.1
 pyradiomics==3.0.1
-PySocks @ file:///home/builder/ci_310/pysocks_1640793678128/work
 pytest==8.3.5
 python-dateutil==2.8.2
 python-gdcm==3.0.22
 pytorch-lightning==2.1.3
-pytorch3d==0.7.5
 pytz==2023.3.post1
 PyWavelets==1.6.0
 PyYAML==6.0.1
-requests @ file:///croot/requests_1690400202158/work
 rich==13.7.0
 ruamel.yaml==0.18.6
 ruamel.yaml.clib==0.2.8
@@ -119,26 +100,21 @@ sphinxcontrib-serializinghtml==2.0.0
 sphstat==1.0.6
 statsmodels==0.14.4
 sympy==1.13.1
-tabulate @ file:///home/conda/feedstock_root/build_artifacts/tabulate_1665138452165/work
-termcolor @ file:///home/conda/feedstock_root/build_artifacts/termcolor_1682317048417/work
 threadpoolctl==3.2.0
 tifffile==2023.9.26
 tomli==2.2.1
-torch==2.2.1+cu121
-torchaudio==2.2.1+cu121
-torchio==0.20.6
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.2.1
+torchaudio==2.2.1
 torchmetrics==1.3.0.post0
-torchvision==0.17.1+cu121
-tqdm @ file:///home/conda/feedstock_root/build_artifacts/tqdm_1691671248568/work
+torchvision==0.17.1
+torchio==0.20.6
 traceback2==1.4.0
 triton==2.2.0
 typer==0.9.0
 typing==3.7.4.3
 typing_extensions==4.12.2
-tzdata @ file:///croot/python-tzdata_1690578112552/work
 unittest2==1.1.0
-urllib3 @ file:///croot/urllib3_1698257533958/work
 webcolors==24.11.1
 wrapt==1.16.0
-yacs @ file:///home/conda/feedstock_root/build_artifacts/yacs_1645705974477/work
 yarl==1.9.4

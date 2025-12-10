@@ -40,14 +40,22 @@ See figure below for example results. Particularly, we show in our paper that re
 The full article describing this method is available at:
 
 **Equivariant Symmetry-Aware Head Pose Estimation for Fetal MRI** \
-Muthukrishnan, Lee, Grant, Adalsteinsson, Gagoski, Billot, Golland
+Muthukrishnan, Gagoski, Lee, Grant, Adalsteinsson, Golland, Billot \
+arXiV (2025) \
+[ [arxiv](https://arxiv.org/abs/2512.04890) | [bibtex](bibtex.bib) | [project page](https://ramyamut.github.io/e3-pose/)]
 
 ---
 ### Installation
 
 1. Clone this repository.
-2. Install python 3.10.
-3. Install all the [required libraries](requirements.txt).
+2. Edit the environment prefix in `environment.yml` and then install all dependencies:
+```
+    cd E3-Pose/
+    conda env create -f environment.yml
+    conda activate e3pose
+    pip install -r requirements.txt
+```
+3. Install [pytorch3d](https://github.com/facebookresearch/pytorch3d/blob/main/INSTALL.md)
 4. If you want to use our trained model weights for fetal brain MRI, download the model weights [here](https://drive.google.com/drive/folders/1r6FVzXG9VLH-0MtMnD2hwjzdDqss1DSE?usp=sharing).
 5. If you want to train your own network on a [publicly available fetal MRI dataset](https://pubmed.ncbi.nlm.nih.gov/40800813/)<sup>10</sup>, download our manually annotated segmentations and poses [here](https://drive.google.com/file/d/1yO2o2sNNNEfcB_-ZDcVvHyCGxqk6SYyE/view?usp=sharing).
 
@@ -136,7 +144,9 @@ This repository contains all the code necessary to train and test your own netwo
 If you find this work useful for your research, please cite:
 
 **Equivariant Symmetry-Aware Head Pose Estimation for Fetal MRI** \
-Muthukrishnan, Lee, Grant, Adalsteinsson, Gagoski, Billot, Golland
+Muthukrishnan, Gagoski, Lee, Grant, Adalsteinsson, Golland, Billot \
+arXiV (2025) \
+[ [arxiv](https://arxiv.org/abs/2512.04890) | [bibtex](bibtex.bib) | [project page](https://ramyamut.github.io/e3-pose/)]
 
 If you have any question regarding the usage of this code, or any suggestions to improve it, please raise an issue
 (preferred) or contact us at:\
@@ -147,7 +157,7 @@ If you have any question regarding the usage of this code, or any suggestions to
 
 ---
 ### References
-<sup>1</sup> *3D Steerable CNNs: Learning Rotationally Equivariant Features in Volumetric Data* \
+<sup>1</sup> *3D steerable CNNs: Learning rotationally equivariant features in volumetric data* \
 Weiler, Geiger, Welling, Boomsma, Cohen \
 Advances in Neural Information Processing Systems, 2018
 
@@ -167,11 +177,11 @@ International Journal of Imaging Systems and Technology, 2021
 Jena, Chaudhari, Gee \
 arXiV, 2024
 
-<sup>6</sup> *SE(3)-Equivariant and Noise-Invariant 3D Rigid Motion racking in Brain MRI* \
+<sup>6</sup> *SE(3)-equivariant and noise-invariant 3D rigid motion tracking in brain MRI* \
 Billot, Dey, Moyer, Hoffmann, Abaci Turk, Gagoski \
 IEEE Transactions on Medical Imaging, 2024
 
-<sup>7</sup> *Real-time Deep Pose Estimation with Geodesic Loss for Image-to-Template Rigid Registration* \
+<sup>7</sup> *Real-time deep pose estimation with geodesic loss for image-to-template rigid registration* \
 Salehi, Khan, Erdogmus, Gholipour \
 IEEE Transactions on Medical Imaging, 2019
 
@@ -179,10 +189,10 @@ IEEE Transactions on Medical Imaging, 2019
 Faghihpirayesh, Karimi, Erdogmus, Gholipour \
 Proceedings of SPIE: Medical Imaging: Image Processing, 2023
 
-<sup>9</sup> *Registration by Regression (RbR): a framework for interpretable and flexible atlas registration* \
+<sup>9</sup> *Registration by Regression (RbR): A framework for interpretable and flexible atlas registration* \
 Gopinath, Hu, Hoffmann, Puonti, Iglesias \
 International Workshop on Biomedical Image Registration, 2024
 
-<sup>10</sup> *The developing human connectome project fetal functional MRI release: methods and data structures* \
+<sup>10</sup> *The developing human connectome project fetal functional MRI release: Methods and data structures* \
 Karolis et al \
 Imaging Neuroscience, 2025

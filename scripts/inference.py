@@ -25,7 +25,7 @@ parser.add_argument("--e3cnn_kernel_size", type=int, dest="e3cnn_kernel_size", d
 
 # -------------------------------------------- output pose parameters ------------------------------------------------
 parser.add_argument("--scanner_space", action="store_true", dest="scanner_space", help="if specified, assume input coordinate frame is the scanner coordinate frame rather than the volume coordinate frame")
-parser.add_argument("--canonical_to_input", action="store_true", dest="canonical_to_input", default=4, help="if specified, compute transform from canonical to input coordinate frame; otherwise compute transform from input to canonical frame")
+parser.add_argument("--input_to_canonical", action="store_true", dest="input_to_canonical", default=4, help="if specified, compute transform from input volume to canonical coordinate frame; otherwise compute transform from canonical to input frame")
 
 # PRINT ALL ARGUMENTS
 print('\nScript name:',  sys.argv[0])

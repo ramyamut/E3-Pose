@@ -30,7 +30,7 @@ def inference(input_image_dir,
              e3cnn_n_levels=4,
              e3cnn_kernel_size=5,
              scanner_space=False,
-             canonical_to_input=False):
+             input_to_canonical=False):
     
     # create network and lightning module
     print('LOADING NETWORKS...')
@@ -62,7 +62,7 @@ def inference(input_image_dir,
         e3cnn_input = torch.tensor(e3cnn_input).squeeze().unsqueeze(0).unsqueeze(0).to(torch.float32).to(device)
         e3cnn_output = e3cnn.forward(e3cnn_input)
         rot_img = utils.postprocess_rotation(torch.clone(e3cnn_output))
-        rot_scanner = aff_rot @ rot_img @ aff_rot.T
+        rot_scanner = aff_rot @ rot_img
         
         # FULL RIGID POSE
         if scanner_space:
@@ -75,9 +75,9 @@ def inference(input_image_dir,
         pose_T[:3,3] = -com
         pose_R = np.eye(4)
         pose_R[:3,:3] = rot
-        pose = pose_R @ pose_T
+        pose = pose_T @ pose_R
         
-        if canonical_to_input:
+        if input_to_canonical:
             pose = np.linalg.inv(pose)
         
         # SAVE OUTPUT

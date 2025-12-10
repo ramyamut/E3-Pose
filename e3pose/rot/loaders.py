@@ -1,7 +1,6 @@
 import copy
 import torch
 import numpy as np
-import os
 import torch.utils.data
 import numpy.random as npr
 import nibabel as nib
@@ -80,7 +79,7 @@ class loader_rot_canonical(torch.utils.data.IterableDataset):
         
         xfm_2 = np.eye(4)
         xfm_2[:3,:3] = Rotation.from_euler('xyz', [float(anno['rot_x']), float(anno['rot_y']), float(anno['rot_z'])], degrees=True).as_matrix()
-        xfm_2 = xfm_2.astype('float32')
+        xfm_2 = xfm_2.astype('float32') # Rotation to GT canonical frame
 
         # spatial augment, outputs numpy matrices in all cases
         frame_mask_1[1][frame_mask_1[1]>1] = 0
@@ -89,10 +88,9 @@ class loader_rot_canonical(torch.utils.data.IterableDataset):
             xfm_1 = np.eye(4)
         else:
             xfm_1 = self.spatial_augmenter.create_random_transform()
-        xfm_1 = xfm_1.astype('float32') @ xfm_2
         frame_mask_1[0], frame_mask_1[1] = utils.preprocess_rot_final(frame_mask_1[0], frame_mask_1[1], scale=0.6, resize=self.resize)
         frame_mask_1, _ = self.spatial_augmenter.perform_transform(xfm_1, *frame_mask_1)
-        xfm_1 = np.linalg.inv(xfm_2 @ np.linalg.inv(xfm_1.astype('float32')))
+        xfm_1 = xfm_2 @ np.linalg.inv(xfm_1.astype('float32')) # Rotation to GT canonical frame AFTER spatial transform
 
         # intensity augment
         label_for_augm = frame_mask_1[1].copy()
@@ -210,6 +208,8 @@ class IntensityAugmenter(object):
             img_res=augm_params["img_res"],
             max_res_iso=augm_params["max_res_iso"],
             gamma=augm_params["gamma"],
+            sigma=augm_params["sigma"],
+            alpha=augm_params["alpha"],
             norm_perc=augm_params["norm_perc"]
         )
         self.trainT = self.aug_model.get_transform()
