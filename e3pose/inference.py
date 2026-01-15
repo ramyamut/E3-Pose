@@ -25,7 +25,7 @@ def inference(input_image_dir,
              unet_feat_mult=2,
              unet_activation='elu',
              unet_n_output_channels=3,
-             seg_thresh=0.9,
+             seg_thresh=[0.9,0.8,-1],
              e3cnn_image_size=64,
              e3cnn_n_levels=4,
              e3cnn_kernel_size=5,
@@ -72,7 +72,7 @@ def inference(input_image_dir,
             rot = rot_img
             com = com_img
         pose_T = np.eye(4)
-        pose_T[:3,3] = -com
+        pose_T[:3,3] = com
         pose_R = np.eye(4)
         pose_R[:3,:3] = rot
         pose = pose_T @ pose_R

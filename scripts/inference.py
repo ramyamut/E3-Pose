@@ -17,6 +17,7 @@ parser.add_argument("--unet_feat", type=int, dest="unet_feat_count", default=16,
 parser.add_argument("--unet_feat_mult", type=int, dest="unet_feat_mult", default=2, help="multiplicative factor for number of features after each U-Net level")
 parser.add_argument("--unet_activation", type=str, dest="unet_activation", default='elu', help="activation function in U-Net")
 parser.add_argument("--unet_n_output_channels", type=int, dest="unet_n_output_channels", default=3, help="number of output channels in U-Net (number of classes + 1)")
+parser.add_argument('--seg_thresh', type=float, nargs='+', default=[0.9,0.8,-1], help='posterior thresholding values for segmentation post-processing')
 
 # -------------------------------------------- E3CNN architecture parameters ------------------------------------------------
 parser.add_argument("--e3cnn_image_size", type=int, dest="e3cnn_image_size", default=64, help="input volume dimension to e3cnn in voxels")
@@ -25,7 +26,7 @@ parser.add_argument("--e3cnn_kernel_size", type=int, dest="e3cnn_kernel_size", d
 
 # -------------------------------------------- output pose parameters ------------------------------------------------
 parser.add_argument("--scanner_space", action="store_true", dest="scanner_space", help="if specified, assume input coordinate frame is the scanner coordinate frame rather than the volume coordinate frame")
-parser.add_argument("--input_to_canonical", action="store_true", dest="input_to_canonical", default=4, help="if specified, compute transform from input volume to canonical coordinate frame; otherwise compute transform from canonical to input frame")
+parser.add_argument("--input_to_canonical", action="store_true", dest="input_to_canonical", help="if specified, compute transform from input volume to canonical coordinate frame; otherwise compute transform from canonical to input frame")
 
 # PRINT ALL ARGUMENTS
 print('\nScript name:',  sys.argv[0])

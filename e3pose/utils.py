@@ -5,10 +5,12 @@ import pandas as pd
 import nibabel as nib
 import itertools
 import torch
-from torch.nn.functional import grid_sample
 import torchio
 from pytorch3d.transforms import matrix_to_euler_angles
 from skimage.measure import label
+from scipy.interpolate import interpn
+from scipy.ndimage.measurements import center_of_mass
+from scipy.spatial.transform import Rotation
 
 # ----------------------------------------------- I/O functions -----------------------------------------------
 
@@ -289,59 +291,71 @@ def sample_t_val_uniform():
     t = uniform_dist.sample().item()
     return t
 
-def simulate_spin_history_artifact(img, label, sigma_range, alpha_range, input_res=3., sample_t_uniform=False):
+def simulate_spin_history_artifact(img, label, random_params, prescribe_params, input_res=3., random=True):
     """
     utility function to simulate spin-history artifact
     """
+    if not random and ("orientation" not in prescribe_params or "center" not in prescribe_params):
+        return torch.clone(img)
     img_shape = list(img.shape)
     artifact = torch.zeros_like(img) # [1, H, W, D]
-    
-    theta0 = 5
-    label = (label == 1).to(torch.int32)
-    label_boundary = torch.nn.functional.max_pool2d(1 - label.float(), kernel_size=theta0, stride=1, padding=(theta0 - 1) // 2)
-    label_boundary -= 1 - label
-    
-    if torch.sum(label_boundary) == 0.:
-        return torch.clone(img)
-    
-    boundary_idx = torch.nonzero(label_boundary[0])
-    factor = [img_shape[1]/64, img_shape[2]/64, img_shape[3]/64]
+    factor = [input_res*img_shape[1]/192, input_res*img_shape[2]/192, input_res*img_shape[3]/192]
     grid = torch.meshgrid(torch.linspace(-factor[0], factor[0], img_shape[1]), torch.linspace(-factor[1], factor[1], img_shape[2]), torch.linspace(-factor[2], factor[2], img_shape[3]))
     grid = torch.stack(list(grid), dim=-1).to(img.device) # [H, W, D, 3]
     
-    boundary_pts = grid[boundary_idx[:,0], boundary_idx[:,1], boundary_idx[:,2],:] # [points, 3 (xyz)]
+    # randomly sample rotation & translation of spin-history artifact
+    if random:
+        sigma_range = random_params["sigma_range"]
+        alpha_range = random_params["alpha_range"]
+        sample_t_uniform = random_params["sample_t_uniform"]
+        theta0 = 5
+        label = (label == 1).to(torch.int32)
+        label_boundary = torch.nn.functional.max_pool2d(1 - label.float(), kernel_size=theta0, stride=1, padding=(theta0 - 1) // 2)
+        label_boundary -= 1 - label
+        if torch.sum(label_boundary) == 0.:
+            return torch.clone(img)
     
-    random_boundary_idx = torch.randperm(len(boundary_idx))
-    p1 = boundary_pts[random_boundary_idx[0]] # [3]
-    dx = boundary_pts - p1.unsqueeze(0) # [points, 3]
-    dists = torch.sum(dx**2, dim=1)
-    max_dist_idx = torch.argmax(dists).item()
-    p2 = boundary_pts[max_dist_idx]
-    dx = p2 - p1
-    boundary_plane_n = torch.nn.functional.normalize(dx, dim=0) * 5
+        boundary_idx = torch.nonzero(label_boundary[0])
+        boundary_pts = grid[boundary_idx[:,0], boundary_idx[:,1], boundary_idx[:,2],:] # [points, 3 (xyz)]
+        random_boundary_idx = torch.randperm(len(boundary_idx))
+        p1 = boundary_pts[random_boundary_idx[0]] # [3]
+        dx = boundary_pts - p1.unsqueeze(0) # [points, 3]
+        dists = torch.sum(dx**2, dim=1)
+        max_dist_idx = torch.argmax(dists).item()
+        p2 = boundary_pts[max_dist_idx]
+        dx = p2 - p1
+        boundary_plane_n = torch.nn.functional.normalize(dx, dim=0)
+        if sample_t_uniform:
+            t = sample_t_val_edge()
+        else:
+            t = sample_t_val_uniform()
     
-    if sample_t_uniform:
-        t = sample_t_val_edge()
+        p = t * p1 + (1. - t) * p2 # [3 s(xyz)]
+        sigma_mm = np.random.uniform(low=sigma_range[0], high=sigma_range[1])
+        alpha = np.random.uniform(low=alpha_range[0], high=alpha_range[1])
+    # artifact rotation & translation based on prescription parameters
     else:
-        t = sample_t_val_uniform()
-    
-    p = t * p1 + (1. - t) * p2 # [3 s(xyz)]
-    
-    d = (p @ boundary_plane_n).item()
+        boundary_plane_n = torch.tensor(prescribe_params['orientation']).to(img.device).float()
+        p = torch.tensor(interpn((np.arange(0, img_shape[1]), np.arange(0, img_shape[2]), np.arange(0, img_shape[3])), grid.numpy(), np.array(prescribe_params['center']))).to(img.device)
+        sigma_mm = prescribe_params["slice_thickness"]/2.355*(prescribe_params["navigator_res"]/input_res)
+        dt = prescribe_params["dt"]
+        # manually setting T1 fetal brain ranges from 3-5s
+        # TODO: update T1 parameters
+        T1 = np.random.uniform(3, 5) 
+        alpha = np.exp(-dt/T1)
+    d = (p.float() @ boundary_plane_n.float()).item()
         
     plane_prod = grid.reshape(-1, 3) @ boundary_plane_n
     plane_prod = plane_prod.reshape(img_shape) # [1, H, W, D]
     plane_prod = plane_prod - d
     
     # simulate artifact
-    sigma_mm = np.random.uniform(low=sigma_range[0], high=sigma_range[1])
-    units = (grid[1,0,0]-grid[0,0,0])[0].item()*5
-    sigma = sigma_mm*input_res/units
-    alpha = np.random.uniform(low=alpha_range[0], high=alpha_range[1])
-    artifact = alpha * 1/(sigma * np.sqrt(2 * np.pi)) * torch.exp(-0.5 * (plane_prod/sigma)**2)
+    units = (grid[1,0,0]-grid[0,0,0])[0].item()
+    sigma = sigma_mm*units/input_res
+    artifact = alpha*torch.exp(-0.5 * (plane_prod/sigma)**2)
     
     img_with_artifact = torch.clone(img)
-    img_with_artifact = img_with_artifact * torch.exp(-artifact)
+    img_with_artifact = img_with_artifact * (1-artifact)
     
     return img_with_artifact
 
@@ -672,20 +686,17 @@ def get_bbox(label):
     center = (min_corner + max_corner)/2
     return center, min_corner, max_corner
 
-def get_largest_cc(mask):
+def filter_connected_components(mask):
     mask_int = mask.astype(np.uint8)
     labels =label(mask_int, connectivity = 1)
-    object_labels = list(np.unique(labels))
-    object_labels.remove(0)
+    object_labels = list(range(1,np.max(np.unique(labels))+1))
+    object_labels_sorted = sorted(object_labels, key=lambda x: np.sum(labels==x),reverse=True)
 
     # get the continuous object that has the largest volume
-    max_obj = 0
-    max_obj_vol = 0
-    for obj_lab in object_labels:
-        vol = np.sum(labels == obj_lab)
-        if vol > max_obj_vol:
-            max_obj_vol = vol
-            max_obj = obj_lab
+    if len(object_labels)==0:
+        max_obj = 0
+    else:
+        max_obj = object_labels_sorted[0]
 
     # remove every other object from the mask
     if max_obj != 0:
@@ -695,19 +706,49 @@ def get_largest_cc(mask):
         mask[idx] = 0
     return mask
 
-def postprocess_segmentation(raw_pred, thresh=0.15):
+def filter_connected_components_fetal_head(brain_mask, eye_mask):
+    masks = [brain_mask.astype(np.uint8), eye_mask.astype(np.uint8)]
+    labels =[label(m, connectivity = 2) for m in masks]
+    object_labels = [list(range(1,np.max(np.unique(l))+1)) for l in labels]
+    object_labels_sorted = [sorted(o, key=lambda x: np.sum(l==x),reverse=True)[:4] for o, l in zip(object_labels, labels)]
+
+    if len(object_labels[0]) > 0:
+        brain_label = [object_labels_sorted[0][0]]
+    else:
+        brain_label = [0]
+    if len(object_labels[1]) > 0:
+        eye_label = object_labels_sorted[1][:2]
+    else:
+        eye_label = [0]
+    filtered_object_labels = [brain_label, eye_label]
+    
+    # remove every other object from the mask
+    for o, fs in zip(object_labels, filtered_object_labels):
+        for f in fs:
+            if f != 0:
+                o.remove(f)
+    for m, l, os in zip(masks, labels, object_labels):
+        for o in os:
+            m[l==o] = 0
+                
+    brain_mask, eye_mask = tuple(masks)
+    return brain_mask, eye_mask
+
+def postprocess_segmentation(raw_pred, thresh=[0.15,0.8,-1], fetal=False):
     
     raw_pred = raw_pred[0].detach().cpu()
     # threshold posteriors
-    raw_pred[0, raw_pred[0] <= thresh] = 0
-    raw_pred[1, raw_pred[1] <= 0.8] = 0
+    for i, t in enumerate(thresh):
+        raw_pred[i, raw_pred[i] <= t] = 0
     
-    final_post = torch.softmax(raw_pred, dim=0)
-    mask = torch.argmax(final_post, dim=0).to(torch.int32) # [H, W, D]
+    posteriors = torch.softmax(raw_pred, dim=0)
+    mask = torch.argmax(posteriors, dim=0).to(torch.int32) # [H, W, D]
     mask = mask.cpu().numpy()
-    processed_mask = get_largest_cc((mask==1))
-    out = torch.tensor(processed_mask).unsqueeze(0)
-    return out.detach().cpu()
+    if fetal:
+        brain_mask, eye_mask = filter_connected_components_fetal_head(mask==1, torch.clone(raw_pred[2]).numpy()>0.5)
+        return torch.tensor(brain_mask).unsqueeze(0).detach().cpu(), torch.tensor(eye_mask).unsqueeze(0).detach().cpu()
+    else:
+        return torch.tensor(filter_connected_components(mask==1)).unsqueeze(0).detach().cpu()
 
 def axes_to_rotation(xax, yax, zax):
     xfm1 = torch.stack([torch.eye(3)]*xax.shape[0], dim=0)
@@ -736,6 +777,59 @@ def postprocess_rotation(raw_pred):
     pred = torch.nn.functional.normalize(pred,dim=2)
     xfm = axes_to_rotation(pred[:,0], pred[:,1], pred[:,2])
     return xfm.squeeze().detach().cpu().numpy()
+
+def fit_ellipsoid(mask, spacing=(1.0, 1.0, 1.0)):
+    # Extract voxel coordinates of mask
+    coords = np.argwhere(mask > 0)  # (N,3) in z,y,x
+    if coords.shape[0] < 10:
+        raise ValueError("Mask too small / empty for ellipsoid fitting.")
+    coords_phys = coords * np.array(spacing)  # (x,y,z)
+    center = coords_phys.mean(axis=0)
+    cov = np.cov((coords_phys - center).T)
+
+    eigvals, eigvecs = np.linalg.eigh(cov)
+
+    order = np.argsort(eigvals)[::-1]
+    eigvals = eigvals[order]
+    eigvecs = eigvecs[:, order]
+
+    return center, eigvecs
+
+def estimate_rot_from_seg(brain_mask, eye_mask):
+    """
+    Estimates rotation from brain/eyes segmentation labels using the method outlined in Hoffmann et al.
+    """
+    brain_com = np.array(center_of_mass(brain_mask))
+    eye_labels =label(eye_mask.astype(np.uint8), connectivity = 2)
+    n_eyes = np.max(eye_labels)
+    if n_eyes != 2:
+        return np.eye(3)
+    else:
+        eye_com1 = np.array(center_of_mass(eye_labels==1))
+        eye_com2 = np.array(center_of_mass(eye_labels==2))
+        eye_com = (eye_com1+eye_com2)/2
+        xax = eye_com2 - eye_com1
+    
+    xax = xax / np.linalg.norm(xax)
+    yax = eye_com - brain_com
+    yax = yax/np.linalg.norm(yax)
+    zax = np.cross(xax, yax)
+    zax = zax / np.linalg.norm(zax)
+    
+    try:
+        rotation = fit_ellipsoid(brain_mask, spacing=(1.0,1.0,1.0))[1]
+    except:
+        return np.eye(3)
+    major_axis = rotation[:,0]
+    plane_normal = np.cross(xax, major_axis)
+    plane_eq = plane_normal @ yax
+    if plane_eq > 0:
+        plane_normal *= -1
+    if zax @ plane_normal < 0:
+        zax *= -1
+    xax = np.cross(yax, zax)
+    output = np.stack([xax,yax,zax], axis=1) @ Rotation.from_euler('xyz', [20,0,0], degrees=True).as_matrix()
+    return output
 
 def get_rot_from_aff(aff):
     rot = np.copy(aff[:3,:3])

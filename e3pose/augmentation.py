@@ -46,7 +46,7 @@ class SegUNetAugmentation:
         self.resolution_transform = self.random_isotropic_LR
         self.random_noise = RandomNoise(max_std=noise_std)
         self.random_gamma = RandomGamma(log_gamma=gamma)
-        self.random_sh_artifact = RandomSpinHistoryArtifact(sigma_range=sigma, alpha_range=alpha, input_res=img_res, sample_t_uniform=False)
+        self.random_sh_artifact = SpinHistoryArtifact(input_res=img_res, random_params={"sigma_range": sigma, "alpha_range": alpha, "sample_t_uniform": True}, random=True)
         self.normalize_intensities_final = Normalize()
         
         # compose transformations
@@ -120,7 +120,7 @@ class RotE3CNNAugmentation:
             self.identity_transform: 0.1
         })
         self.normalize_intensities = torchio.transforms.Lambda(lambda x: utils.normalize_perc(x, normalize_percentiles), types_to_apply=[torchio.INTENSITY])
-        self.random_sh_artifact = RandomSpinHistoryArtifact(sigma_range=sigma, alpha_range=alpha, input_res=img_res*0.6, sample_t_uniform=True)
+        self.random_sh_artifact = SpinHistoryArtifact(input_res=img_res*0.6, random_params={"sigma_range": sigma, "alpha_range": alpha, "sample_t_uniform": True}, random=True)
         self.normalize_intensities_final = Normalize()
         self.random_gamma = RandomGamma(log_gamma=gamma)
         
@@ -163,24 +163,28 @@ class RandomIsotropicLR(torchio.transforms.Transform):
         subject['image'] = upsampled
         return subject
 
-class RandomSpinHistoryArtifact(torchio.transforms.Transform):
+class SpinHistoryArtifact(torchio.transforms.Transform):
     """
     Augments volumes with simulated spin-history artifacts from high-resolution anatomical 2D MRI slices
     """
-    def __init__(self, p=1, sigma_range=(0.08,0.12), alpha_range=(0.5,1.5), input_res=3., sample_t_uniform=False):
+    def __init__(self, p=1, input_res=3., random_params=None, prescribe_params=None, random=True):
         super().__init__(p=p)
-        self.sigma_range = sigma_range
-        self.alpha_range = alpha_range
-        self.sample_t_uniform = sample_t_uniform
         self.input_res = input_res
+        self.random_params = random_params
+        self.prescribe_params = prescribe_params
+        self.random = random
+        if self.random_params is None:
+            self.random = False
     
     def apply_transform(self, subject):
         mask = subject['label']
         vol = subject['image']
-        # try:
-        vol_artifact = utils.simulate_spin_history_artifact(vol.tensor, mask.tensor, self.sigma_range, self.alpha_range, self.input_res, sample_t_uniform=self.sample_t_uniform)
-        # except:
-        #     vol_artifact = torch.clone(vol.tensor)
+        if self.random:
+            vol_artifact = utils.simulate_spin_history_artifact(vol.tensor, mask.tensor, self.random_params, None, self.input_res, random=True)
+        else:
+            vol_artifact_navigator = utils.simulate_spin_history_artifact(vol.tensor, mask.tensor, None, self.prescribe_params["navigator"], self.input_res, random=False)
+            vol_artifact_slice = utils.simulate_spin_history_artifact(vol.tensor, mask.tensor, None, self.prescribe_params["slice"], self.input_res, random=False)
+            vol_artifact = vol_artifact_navigator*mask.tensor + vol_artifact_slice*(1-mask.tensor)
         subject['image'] = torchio.ScalarImage(tensor=vol_artifact, affine=subject['image'].affine)
         return subject
 
