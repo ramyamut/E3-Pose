@@ -23,11 +23,12 @@ class SegUNetAugmentation:
                  ):
         # define all transformations to be applied
         self.crop_size = crop_size
+        self.img_res = img_res
         self.identity_transform = torchio.transforms.Lambda(lambda x: utils.identity_transform(x))
         self.random_affine = torchio.transforms.RandomAffine(
             scales=(scaling_bounds[0], scaling_bounds[1], scaling_bounds[0], scaling_bounds[1], scaling_bounds[0], scaling_bounds[1]),
             degrees=(rotation_bounds, rotation_bounds, rotation_bounds),
-            translation=(translation_bounds, translation_bounds, translation_bounds)
+            translation=(translation_bounds/self.img_res, translation_bounds/self.img_res, translation_bounds/self.img_res)
         )
         self.random_scale = torchio.transforms.RandomAffine(
             scales=(scaling_bounds[0], scaling_bounds[1], scaling_bounds[0], scaling_bounds[1], scaling_bounds[0], scaling_bounds[1]),
@@ -40,13 +41,13 @@ class SegUNetAugmentation:
         normalize_percentiles = norm_perc if isinstance(norm_perc, tuple) else (norm_perc, 1.-norm_perc)
         self.normalize_intensities = torchio.transforms.Lambda(lambda x: utils.normalize_perc(x, normalize_percentiles), types_to_apply=[torchio.INTENSITY])
         self.max_res_iso = np.array(utils.reformat_to_list(max_res_iso, length=3, dtype='float'))
-        self.iso_downsampling_scale = np.max(self.max_res_iso / img_res)
+        self.iso_downsampling_scale = np.max(self.max_res_iso / self.img_res)
         self.random_isotropic_LR = RandomIsotropicLR(lr_scale=self.iso_downsampling_scale)
         resolution_prob = 0.75 if randomise_res else 0.
         self.resolution_transform = self.random_isotropic_LR
         self.random_noise = RandomNoise(max_std=noise_std)
         self.random_gamma = RandomGamma(log_gamma=gamma)
-        self.random_sh_artifact = SpinHistoryArtifact(input_res=img_res, random_params={"sigma_range": sigma, "alpha_range": alpha, "sample_t_uniform": True}, random=True)
+        self.random_sh_artifact = SpinHistoryArtifact(input_res=self.img_res, random_params={"sigma_range": sigma, "alpha_range": alpha, "sample_t_uniform": True}, random=True)
         self.normalize_intensities_final = Normalize()
         
         # compose transformations

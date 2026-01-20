@@ -24,7 +24,7 @@ parser.add_argument("--crop_size", dest="crop_size", type=int, default=128, help
 parser.add_argument("--scaling_lower_bound", dest="scaling_lower_bound", type=float, default=0.5, help="random scaling lower bound parameter for data augmentation")
 parser.add_argument("--scaling_upper_bound", dest="scaling_upper_bound", type=float, default=1.3, help="random scaling upper bound parameter for data augmentation")
 parser.add_argument("--rotation", dest="rotation_bounds", type=float, default=180, help="random rotation parameter for data augmentation")
-parser.add_argument("--translation", dest="translation_bounds", type=float, default=10, help="random translation parameter for data augmentation")
+parser.add_argument("--translation", dest="translation_bounds", type=float, default=30, help="random translation (in mm) parameter for data augmentation")
 
 # OTHER AUGMENTATIONS
 parser.add_argument("--randomise_res", action='store_true', dest="randomise_res", help="augment training volumes with randomly simulated low resolutions")
@@ -52,8 +52,8 @@ parser.add_argument("--n_output_channels", type=int, dest="n_output_channels", d
 # GENERAL
 parser.add_argument("--lr", type=float, dest="lr", default=1e-4, help="learning rate")
 parser.add_argument("--weight_decay", type=float, dest="weight_decay", default=0., help="weight decay")
-parser.add_argument("--class_weights", nargs="*", dest="class_weights", default=[], help="class weights for dice and cross-entropy losses")
-parser.add_argument("--dice_weight", type=float, dest="dice_weight", default=1., help="weight of dice loss when summed with cross-entropy loss")
+parser.add_argument("--class_weights", nargs="*", dest="class_weights", default=[1.,8.,2.], help="class weights for dice and cross-entropy losses")
+parser.add_argument("--dice_weight", type=float, dest="dice_weight", default=0.5, help="weight of dice loss when summed with cross-entropy loss")
 parser.add_argument("--n_epochs", type=int, dest="n_epochs", default=1000, help="number of training epochs")
 parser.add_argument("--resume", action='store_true', dest="resume", help="resume training from previous run")
 
