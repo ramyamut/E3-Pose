@@ -51,13 +51,14 @@ arXiV (2025) \
 2. Edit the environment prefix in `environment.yml` and then install all dependencies:
 ```
     cd E3-Pose/
-    conda env create -f environment.yml
+    conda env create -f environment.yaml
     conda activate e3pose
     pip install -r requirements.txt
+    git clone https://github.com/facebookresearch/pytorch3d.git
+    export PYTHONPATH="$PWD:$PWD/pytorch3d"
 ```
-3. Install [pytorch3d](https://github.com/facebookresearch/pytorch3d/blob/main/INSTALL.md)
-4. If you want to use our trained model weights for fetal brain MRI, download the model weights [here](https://drive.google.com/drive/folders/1r6FVzXG9VLH-0MtMnD2hwjzdDqss1DSE?usp=sharing).
-5. If you want to train your own network on a [publicly available fetal MRI dataset](https://pubmed.ncbi.nlm.nih.gov/40800813/)<sup>10</sup>, download our manually annotated segmentations and poses [here](https://drive.google.com/file/d/1yO2o2sNNNEfcB_-ZDcVvHyCGxqk6SYyE/view?usp=sharing).
+3. If you want to use our trained model weights for fetal brain MRI, download the model weights [here](https://drive.google.com/drive/folders/1r6FVzXG9VLH-0MtMnD2hwjzdDqss1DSE?usp=sharing).
+4. If you want to train your own network on a [publicly available fetal MRI dataset](https://pubmed.ncbi.nlm.nih.gov/40800813/)<sup>10</sup>, download our manually annotated segmentations and poses [here](https://drive.google.com/file/d/1yO2o2sNNNEfcB_-ZDcVvHyCGxqk6SYyE/view?usp=sharing).
 
 You're now ready to use E(3)-Pose!
 
