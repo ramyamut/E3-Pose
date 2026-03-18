@@ -40,7 +40,7 @@ See figure below for example results. Particularly, we show in our paper that re
 The full article describing this method is available at:
 
 **Equivariant Symmetry-Aware Head Pose Estimation for Fetal MRI** \
-Muthukrishnan, Gagoski, Lee, Grant, Adalsteinsson, Golland, Billot \
+Muthukrishnan, Gagoski, Lee, Grant, Adalsteinsson, Billot, Golland \
 arXiV (2025) \
 [ [arxiv](https://arxiv.org/abs/2512.04890) | [bibtex](bibtex.bib) | [project page](https://ramyamut.github.io/e3-pose/)]
 
@@ -145,7 +145,7 @@ This repository contains all the code necessary to train and test your own netwo
 If you find this work useful for your research, please cite:
 
 **Equivariant Symmetry-Aware Head Pose Estimation for Fetal MRI** \
-Muthukrishnan, Gagoski, Lee, Grant, Adalsteinsson, Golland, Billot \
+Muthukrishnan, Gagoski, Lee, Grant, Adalsteinsson, Billot, Golland \
 arXiV (2025) \
 [ [arxiv](https://arxiv.org/abs/2512.04890) | [bibtex](bibtex.bib) | [project page](https://ramyamut.github.io/e3-pose/)]
 
@@ -179,7 +179,7 @@ Jena, Chaudhari, Gee \
 arXiV, 2024
 
 <sup>6</sup> *SE(3)-equivariant and noise-invariant 3D rigid motion tracking in brain MRI* \
-Billot, Dey, Moyer, Hoffmann, Abaci Turk, Gagoski \
+Billot, Dey, Moyer, Hoffmann, Abaci Turk, Gagoski, Grant, Golland \
 IEEE Transactions on Medical Imaging, 2024
 
 <sup>7</sup> *Real-time deep pose estimation with geodesic loss for image-to-template rigid registration* \
