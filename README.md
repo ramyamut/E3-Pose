@@ -54,6 +54,7 @@ arXiV (2025) \
     conda env create -f environment.yaml
     conda activate e3pose
     pip install -r requirements.txt
+    pip install pyradiomics --no-build-isolation
     git clone https://github.com/facebookresearch/pytorch3d.git
     export PYTHONPATH="$PWD:$PWD/pytorch3d"
 ```
