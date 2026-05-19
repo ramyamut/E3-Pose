@@ -8,9 +8,9 @@ import torch
 import torchio
 from pytorch3d.transforms import matrix_to_euler_angles
 from skimage.measure import label
-from scipy.interpolate import interpn
+from scipy.interpolate import interpn, interp1d
 from scipy.ndimage.measurements import center_of_mass
-from scipy.spatial.transform import Rotation
+from scipy.spatial.transform import Rotation, Slerp
 
 # ----------------------------------------------- I/O functions -----------------------------------------------
 
@@ -102,6 +102,30 @@ def build_xfm_dict(xfm_dir):
         data_dict[subjID_frameID] = path_xfm  # each entry of the dict is a list with a list of 1
     return data_dict
 
+def sample_motion_trajectory(sample_df,times):
+    """sample rigid motion trajectory from real fetal head motion trajectories"""
+    traj_idx = np.random.choice(pd.unique(sample_df['sample']))
+    traj_df = sample_df[sample_df['sample']==traj_idx]
+    traj_times = traj_df['t'].tolist()
+    traj_tx = traj_df['tx'].tolist()
+    traj_ty = traj_df['ty'].tolist()
+    traj_tz = traj_df['tz'].tolist()
+    traj_r = [Rotation.from_rotvec([rx,ry,rz], degrees=True).as_matrix() for rx,ry,rz in zip(traj_df['r0x'].tolist(), traj_df['r0y'].tolist(), traj_df['r0z'].tolist())]
+    while traj_times[-1] < times[-1]:
+            traj_idx = np.random.choice(pd.unique(sample_df['sample']))
+            traj_df = sample_df[(sample_df['sample']==traj_idx) & (sample_df['t']>0)]
+            duration=traj_df['t'].max()
+            traj_times += (traj_df['t']+traj_times[-1]).tolist()
+            traj_tx += (traj_df['tx']+traj_tx[-1]).tolist()
+            traj_ty += (traj_df['ty']+traj_ty[-1]).tolist()
+            traj_tz += (traj_df['tz']+traj_tz[-1]).tolist()
+            traj_r += [Rotation.from_rotvec([rx,ry,rz], degrees=True).as_matrix()@traj_r[-1] for rx,ry,rz in zip(traj_df['r0x'].tolist(), traj_df['r0y'].tolist(), traj_df['r0z'].tolist())]
+    traj_slerp = Slerp(traj_times, Rotation.from_matrix(np.stack(traj_r, axis=0)))
+    traj_interp = interp1d(np.array(traj_times), np.array([traj_tx,traj_ty,traj_tz]))
+    traj_rots = traj_slerp(times)
+    traj_trans = traj_interp(times).T
+    return traj_rots.as_matrix(), traj_trans
+    
 # ----------------------------------------------- preprocessing functions -----------------------------------------------
 
 def preprocess_seg(image, aff, crop_size=128):

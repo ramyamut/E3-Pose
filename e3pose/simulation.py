@@ -6,17 +6,13 @@ import numpy as np
 import torch
 import torchio
 import json
-from scipy.spatial.transform import Rotation, Slerp
+from scipy.spatial.transform import Rotation
 from scipy.interpolate import interpn
 from scipy.ndimage import center_of_mass
 import time
-from scipy.interpolate import interp1d
 
 from e3pose import inference, utils, augmentation
 from e3pose.rot.loaders import SpatialAugmenter
-# from rot.loaders import SpatialAugmenter
-# from release.src import augmenters, utils, networks
-# from seg import augmentation, unet
 
 def update_rigid_motion(rots, trans, frame, voxel_res):
     xfm_motion_R = np.eye(4)
@@ -37,31 +33,9 @@ def compute_slice_aff_canonical(slice_affine, xfm_tocanonical, slice_center, sli
     slice_center_canonical_vol = xfm_tocanonical[:3,:3] @ (slice_center-image_center) + image_center + xfm_tocanonical[:3,3]
     slice_center_scanner = (vol_aff @ np.array(slice_center_canonical_vol.tolist()+[1]))[:3]
     slice_affine_canonical = np.eye(4)
-    slice_affine_canonical[:3,:3] = (vol_aff @ xfm_tocanonical @ slice_affine)[:3,:3]
+    slice_affine_canonical[:3,:3] = (xfm_tocanonical @ slice_affine)[:3,:3]
     slice_affine_canonical[:3,3] = slice_center_scanner - (slice_affine_canonical[:3,:3] @ slice_center_vox)
     return slice_affine_canonical
-
-def sample_motion_trajectory(sample_df,times):
-        traj_idx = np.random.choice(pd.unique(sample_df['sample']))
-        traj_df = sample_df[sample_df['sample']==traj_idx]
-        traj_times = traj_df['t'].tolist()
-        traj_tx = traj_df['tx'].tolist()
-        traj_ty = traj_df['ty'].tolist()
-        traj_tz = traj_df['tz'].tolist()
-        traj_r = [Rotation.from_euler('xyz', [rx,ry,rz], degrees=True).as_matrix() for rx,ry,rz in zip(traj_df['rx'].tolist(), traj_df['ry'].tolist(), traj_df['rz'].tolist())]
-        while traj_times[-1] < times[-1]:
-                traj_idx = np.random.choice(pd.unique(sample_df['sample']))
-                traj_df = sample_df[(sample_df['sample']==traj_idx) & (sample_df['t']>0)]
-                traj_times += (traj_df['t']+traj_times[-1]).tolist()
-                traj_tx += (traj_df['tx']+traj_tx[-1]).tolist()
-                traj_ty += (traj_df['ty']+traj_ty[-1]).tolist()
-                traj_tz += (traj_df['tz']+traj_tz[-1]).tolist()
-                traj_r += [Rotation.from_euler('xyz', [rx,ry,rz], degrees=True).as_matrix()@traj_r[-1] for rx,ry,rz in zip(traj_df['rx'].tolist(), traj_df['ry'].tolist(), traj_df['rz'].tolist())]
-        traj_slerp = Slerp(traj_times, Rotation.from_matrix(np.stack(traj_r, axis=0)))
-        traj_interp = interp1d(np.array(traj_times), np.array([traj_tx,traj_ty,traj_tz]))
-        traj_rots = traj_slerp(times)
-        traj_trans = traj_interp(times).T
-        return traj_rots.as_matrix(), traj_trans
 
 def simulate(output_dir, image_dir, seg_label_dir, pose_label_csv, trajectory_csv, unet_path, e3cnn_path, acq_params, unet_params, e3cnn_params, run=0):
         list_images = sorted(glob.glob(f"{image_dir}/*nii.gz"))
@@ -140,7 +114,7 @@ def simulate(output_dir, image_dir, seg_label_dir, pose_label_csv, trajectory_cs
                 navigator_times = np.arange(n_slices_per_stack)*tr
                 slice_times = navigator_times + dt
                 times = np.stack([navigator_times,slice_times],axis=1).reshape(-1).tolist()
-                traj_rots, traj_trans = sample_motion_trajectory(trajectory_df, times)
+                traj_rots, traj_trans = utils.sample_motion_trajectory(trajectory_df, times)
                 navigator_rots = traj_rots[::2]
                 navigator_trans = traj_trans[::2]
                 slice_rots = traj_rots[1::2]
