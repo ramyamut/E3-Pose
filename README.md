@@ -41,7 +41,7 @@ The full article describing this method is available at:
 
 **Equivariant Symmetry-Aware Head Pose Estimation for Fetal MRI** \
 Muthukrishnan, Gagoski, Lee, Grant, Adalsteinsson, Billot, Golland \
-arXiV (2025) \
+ECCV, 2026 \
 [ [arxiv](https://arxiv.org/abs/2512.04890) | [bibtex](bibtex.bib) | [project page](https://ramyamut.github.io/e3-pose/)]
 
 ---
