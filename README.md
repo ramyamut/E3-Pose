@@ -147,7 +147,7 @@ If you find this work useful for your research, please cite:
 
 **Equivariant Symmetry-Aware Head Pose Estimation for Fetal MRI** \
 Muthukrishnan, Gagoski, Lee, Grant, Adalsteinsson, Billot, Golland \
-arXiV (2025) \
+ECCV, 2026 \
 [ [arxiv](https://arxiv.org/abs/2512.04890) | [bibtex](bibtex.bib) | [project page](https://ramyamut.github.io/e3-pose/)]
 
 If you have any question regarding the usage of this code, or any suggestions to improve it, please raise an issue
@@ -161,11 +161,11 @@ If you have any question regarding the usage of this code, or any suggestions to
 ### References
 <sup>1</sup> *3D steerable CNNs: Learning rotationally equivariant features in volumetric data* \
 Weiler, Geiger, Welling, Boomsma, Cohen \
-Advances in Neural Information Processing Systems, 2018
+NeurIPS, 2018
 
 <sup>2</sup> *Leveraging SO(3)-steerable convolutions for pose-robust semantic segmentation in 3D medical data* \
 Diaz, Geiger, McKinley \
-Journal of Machine Learning in Biomedical Imaging, 2024
+MELBA, 2024
 
 <sup>3</sup> *e3nn: Euclidean neural networks* \
 Geiger and Smidt \
@@ -173,7 +173,7 @@ arXiV, 2022
 
 <sup>4</sup> *Rapid head-pose detection for automated slice prescription of fetal-brain MRI* \
 Hoffmann, Abaci Turk, Gagoski, Morgan, Wighton, Tisdall, Reuter, Adalsteinsson, Grant, Wald, van der Kouwe \
-International Journal of Imaging Systems and Technology, 2021
+IMA, 2021
 
 <sup>5</sup> *FireANTs: Adaptive Riemannian optimization for multi-scale diffeomorphic registration* \
 Jena, Chaudhari, Gee \
@@ -181,19 +181,19 @@ arXiV, 2024
 
 <sup>6</sup> *SE(3)-equivariant and noise-invariant 3D rigid motion tracking in brain MRI* \
 Billot, Dey, Moyer, Hoffmann, Abaci Turk, Gagoski, Grant, Golland \
-IEEE Transactions on Medical Imaging, 2024
+IEEE TMI, 2024
 
 <sup>7</sup> *Real-time deep pose estimation with geodesic loss for image-to-template rigid registration* \
 Salehi, Khan, Erdogmus, Gholipour \
-IEEE Transactions on Medical Imaging, 2019
+IEEE TMI, 2019
 
 <sup>8</sup> *Automatic brain pose estimation in fetal MRI* \
 Faghihpirayesh, Karimi, Erdogmus, Gholipour \
-Proceedings of SPIE: Medical Imaging: Image Processing, 2023
+Proc. SPIE: Medical Imaging, 2023
 
 <sup>9</sup> *Registration by Regression (RbR): A framework for interpretable and flexible atlas registration* \
 Gopinath, Hu, Hoffmann, Puonti, Iglesias \
-International Workshop on Biomedical Image Registration, 2024
+MICCAI Workshop on Biomedical Image Registration, 2024
 
 <sup>10</sup> *The developing human connectome project fetal functional MRI release: Methods and data structures* \
 Karolis et al \
